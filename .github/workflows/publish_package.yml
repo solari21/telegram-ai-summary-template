@@ -1,0 +1,39 @@
+name: Publish Python Package to GitHub Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: 🛠️ Build package distribution (sdist and wheel)
+        run: |
+          python -m build
+
+      - name: 🚀 Publish to GitHub Packages
+        env:
+          TWINE_USERNAME: ${{ github.actor }}
+          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          TWINE_REPOSITORY_URL: "https://upload.packages.github.com/${{ github.repository_owner }}/"
+        run: |
+          twine upload --skip-existing dist/*

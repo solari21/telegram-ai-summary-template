@@ -5,20 +5,32 @@ from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader
 from playwright.async_api import async_playwright
 
-from src.config import TIMEZONE, COMMUNITY_NAME
+from .config import TIMEZONE, COMMUNITY_NAME
 
 logger = logging.getLogger("card_renderer")
+
+def get_templates_dir() -> str:
+    # 1. Package bundled templates directory
+    pkg_templates = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
+    if os.path.isdir(pkg_templates) and os.path.exists(os.path.join(pkg_templates, "card_template.html")):
+        return pkg_templates
+
+    # 2. Project root fallback
+    root_templates = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "templates")
+    if os.path.isdir(root_templates) and os.path.exists(os.path.join(root_templates, "card_template.html")):
+        return root_templates
+
+    return pkg_templates
 
 async def render_summary_card(summary_data: dict, output_path: str = "output/summary_card.png") -> str:
     """
     Renders the structured JSON summary into a high-resolution PNG image
     using an HTML/CSS Jinja2 template and headless Chromium (Playwright).
     """
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
 
     # 1. Prepare template variables
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    templates_dir = os.path.join(base_dir, "templates")
+    templates_dir = get_templates_dir()
     env = Environment(loader=FileSystemLoader(templates_dir))
     template = env.get_template("card_template.html")
 

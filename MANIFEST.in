@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+include requirements.txt
+include .env.example
+recursive-include src/telegram_ai_summary/templates *.html
+recursive-include templates *.html
+recursive-include assets *.png

@@ -2,7 +2,7 @@ import logging
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
-from src.config import (
+from .config import (
     TELEGRAM_API_ID,
     TELEGRAM_API_HASH,
     TELEGRAM_STRING_SESSION,

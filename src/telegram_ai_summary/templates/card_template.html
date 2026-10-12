@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Segoe UI Emoji', 'Apple Color Emoji';
+    background: #0b0e14;
+    color: #e4e7eb;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+  }
+  .container {
+    width: 820px;
+    background: linear-gradient(180deg, #131923 0%, #0d121a 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    padding: 32px 36px 36px 36px;
+  }
+  
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 24px;
+  }
+  .badge-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 150, 255, 0.12);
+    border: 1px solid rgba(0, 150, 255, 0.35);
+    color: #4da3ff;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .title {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 30%, #a8c7fa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+  .meta-pills {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #cbd5e1;
+    font-weight: 500;
+  }
+
+  /* SECTION CARDS */
+  .section-card {
+    background: #17212f;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .section-icon {
+    font-size: 22px;
+  }
+  .section-title-wrap {
+    flex: 1;
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #f1f5f9;
+  }
+  .section-tagline {
+    font-size: 12px;
+    color: #64748b;
+    font-style: italic;
+  }
+
+  /* ENTRIES */
+  .entry-list {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+  .entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #cbd5e1;
+  }
+  .user-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+  .badge-blue { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+  .badge-purple { background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3); }
+  .badge-orange { background: rgba(251, 146, 60, 0.15); color: #fb923c; border: 1px solid rgba(251, 146, 60, 0.3); }
+  .badge-green { background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+  .badge-red { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+  .badge-yellow { background: rgba(250, 204, 21, 0.15); color: #facc15; border: 1px solid rgba(250, 204, 21, 0.3); }
+
+  .entry-content strong {
+    color: #f8fafc;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 12px;
+    color: #64748b;
+  }
+  .footer span {
+    color: #94a3b8;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge-top">{{ badge_top | default("🎙️ " ~ community_name ~ " • Daily Digest") }}</div>
+    <h1 class="title">{{ title }}</h1>
+    <p class="subtitle">{{ subtitle }}</p>
+    <div class="meta-pills">
+      {% for pill in pills %}
+      <span class="pill">{{ pill }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- SECTIONS -->
+  {% for section in sections %}
+  <div class="section-card">
+    <div class="section-header">
+      <span class="section-icon">{{ section.icon }}</span>
+      <div class="section-title-wrap">
+        <div class="section-title">{{ section.title }}</div>
+        <div class="section-tagline">{{ section.tagline }}</div>
+      </div>
+    </div>
+    <div class="entry-list">
+      {% for entry in section.entries %}
+      <div class="entry">
+        <span class="user-badge badge-{{ entry.badge_color | default('blue') }}">{{ entry.user }}</span>
+        <div class="entry-content">{{ entry.content | safe }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Generated with ❤️ & AI for <span>{{ community_name }}</span> • {{ footer_date }}
+  </div>
+</div>
+
+</body>
+</html>

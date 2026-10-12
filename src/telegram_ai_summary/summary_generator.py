@@ -2,7 +2,7 @@ import json
 import logging
 import urllib.request
 import urllib.error
-from src.config import GEMINI_API_KEY, COMMUNITY_NAME
+from .config import GEMINI_API_KEY, COMMUNITY_NAME
 
 logger = logging.getLogger("summary_generator")
 
@@ -85,7 +85,6 @@ Chat messages in chronological order:
 Generate the structured JSON digest following all style and schema rules.
 """
 
-    # Multi-model resilience cascade: latest cutting-edge models down to fast lites
     candidate_models = [
         "gemini-3.8-flash",
         "gemini-3.5-flash",

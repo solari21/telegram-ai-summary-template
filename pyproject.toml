@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telegram-ai-summary"
+version = "0.1.0"
+description = "AI-powered infographic daily digest generator for Telegram communities"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    { name = "Jesús Moronta", email = "solari21@gmail.com" }
+]
+keywords = [
+    "telegram",
+    "bot",
+    "gemini",
+    "ai",
+    "infographics",
+    "playwright",
+    "telethon",
+    "digest",
+    "summary",
+    "serverless",
+    "github-actions"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: Chat",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+dependencies = [
+    "telethon>=1.36.0",
+    "playwright>=1.40.0",
+    "jinja2>=3.1.0",
+    "python-dotenv>=1.0.0",
+    "tzdata>=2024.1"
+]
+
+[project.urls]
+Homepage = "https://github.com/solari21/telegram-ai-summary-template"
+Repository = "https://github.com/solari21/telegram-ai-summary-template"
+Issues = "https://github.com/solari21/telegram-ai-summary-template/issues"
+
+[project.scripts]
+telegram-ai-summary = "telegram_ai_summary.cli:main"
+telegram-summary = "telegram_ai_summary.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+telegram_ai_summary = ["templates/*.html"]

@@ -5,7 +5,7 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.tl.types import User
 
-from src.config import (
+from .config import (
     TELEGRAM_API_ID,
     TELEGRAM_API_HASH,
     TELEGRAM_STRING_SESSION,
@@ -38,7 +38,7 @@ async def fetch_messages_since(hours_back: float = 8.0) -> list:
     await client.connect()
     if not await client.is_user_authorized():
         await client.disconnect()
-        raise PermissionError("Telegram StringSession is invalid or expired. Re-run tools/generate_string_session.py.")
+        raise PermissionError("Telegram StringSession is invalid or expired. Re-run session generator.")
 
     try:
         chat = await client.get_entity(chat_target)

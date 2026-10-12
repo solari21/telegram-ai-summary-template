@@ -1,13 +1,14 @@
 # 🚀 Telegram AI Daily Summary Bot & Infographic Generator
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![Package](https://img.shields.io/badge/package-telegram--ai--summary-007EC6.svg?logo=pypi&logoColor=white)](https://github.com/solari21/telegram-ai-summary-template)
 [![GitHub Actions](https://img.shields.io/badge/automation-GitHub_Actions-2088FF.svg?logo=github-actions&logoColor=white)](https://github.com/features/actions)
 [![Google Gemini API](https://img.shields.io/badge/AI-Google_Gemini_3_Flash-8E75B2.svg?logo=google&logoColor=white)](https://aistudio.google.com/)
 [![Telethon](https://img.shields.io/badge/telegram-Telethon_MTProto-2CA5E0.svg?logo=telegram&logoColor=white)](https://docs.telethon.dev/)
 [![Playwright](https://img.shields.io/badge/renderer-Playwright_Chromium-45ba4b.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Transform active Telegram communities and gaming groups into a visually stunning, witty AI infographic digest. 100% Serverless, Free Tier & Automated via GitHub Actions.**
+> **Transform active Telegram communities and gaming groups into a visually stunning, witty AI infographic digest. Available both as an automated Serverless Template and as an installable Python CLI Package.**
 
 ---
 
@@ -50,9 +51,30 @@ flowchart LR
 
 ---
 
-## ⚡ 5-Minute Quick Start Guide
+## 📦 Quick Installation as a Python Package / CLI
 
-Follow these steps to deploy your own instance of the bot completely free on GitHub:
+You can install and use `telegram-ai-summary` directly in any environment via `pip`:
+
+```bash
+# 1. Install directly from GitHub:
+pip install git+https://github.com/solari21/telegram-ai-summary-template.git
+
+# 2. Install Playwright browser dependencies:
+playwright install chromium
+
+# 3. Generate your Telegram session string:
+telegram-ai-summary session
+
+# 4. Generate a sample offline preview infographic:
+telegram-ai-summary demo
+
+# 5. Run the live digest pipeline:
+telegram-ai-summary run --hours 8
+```
+
+---
+
+## ⚡ 5-Minute Quick Start Guide (GitHub Actions Serverless)
 
 ### Step 1: Fork or Clone This Repository
 
