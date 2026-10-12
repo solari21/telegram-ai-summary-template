@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Environment Variables & Secrets
+.env
+*.session
+*.session-journal
+
+# Output artifacts
+output/*.png
+output/*.html
+!output/.gitkeep
+
+# Playwright
+.playwright/
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
