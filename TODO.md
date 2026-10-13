@@ -1,0 +1,55 @@
+# 📋 Project Status & Roadmap (TODO & Milestones)
+
+Living tracking document for the implementation status, verified production milestones, and upcoming roadmap for **Telegram AI Summary Bot Template**.
+
+---
+
+## ✅ Completed Milestones (100% Production Ready & Tested)
+
+### 1. Telegram MTProto Data Fetcher
+- [x] **Native MTProto client via Telethon & StringSession**: Secure user-account message collection without requiring third-party bot tokens.
+- [x] **Strict timezone normalization**: UTC timestamps converted to target community timezone (`TIMEZONE` setting, defaulting to `Europe/Madrid`).
+- [x] **Multi-mode inspection horizons**: Supports relative time horizons (`--hours N`), automatic slot windows, and 24-hour calendar days (`--full-day`).
+- [x] **Midnight Boundary Resilience**: Automatic detection for early morning executions (00:00 - 05:59 local time), targeting **yesterday's full calendar day** (00:00:00 to 23:59:59) to prevent empty digests caused by GitHub Actions queue delays.
+- [x] **Dynamic slot window expansion**: Gracefully extends the inspection horizon backwards if runner queues delay the evening run past midnight.
+
+### 2. AI Digest Engine (Google Gemini)
+- [x] **5-Model Resilience Cascade**:
+  1. `gemini-3.8-flash` (Primary: maximum reasoning and wit).
+  2. `gemini-3.5-flash` (Fallback 1: high speed and quality).
+  3. `gemini-3.5-flash-lite` (Fallback 2: lightweight efficiency).
+  4. `gemini-2.0-flash` (Fallback 3: high availability).
+  5. `gemini-2.0-flash-lite` (Fallback 4: ultimate continuity fallback).
+- [x] **Exponential backoff retries**: Up to 2 retries with 3s and 6s intervals for transient Google API errors (HTTP 503 / 500 / 429).
+- [x] **Contextual dynamic subtitles**: Automatically tailored to morning, midday, evening, full-day, or manual runs.
+- [x] **Custom titles support**: Easily add custom headlines (`--custom-title "EVENT NAME"`).
+
+### 3. Visual Infographic Rendering & Delivery
+- [x] **HTML/CSS dark mode gamer card**: Jinja2 templated with dynamic category badges and responsive typography.
+- [x] **Headless Playwright Chromium renderer**: Ultra-crisp Retina x2 device scale factor capture.
+- [x] **Automated Telegram delivery**: Delivers rendered PNG directly to Telegram Saved Messages (`'me'`) or configurable chat.
+
+### 4. Serverless GitHub Actions Workflows & Packaging
+- [x] **Triple workflow architecture**:
+  - `daily_summary.yml`: Automated slot digests (07:00, 14:30, 22:00 local).
+  - `full_day_summary.yml`: Automated 24-hour full-day digest (23:58 local).
+  - `manual_summary.yml`: Interactive on-demand dispatch with custom parameters.
+- [x] **Anti-congestion off-peak cron minutes**: Configured at minutes `:02`, `:32`, and `:58` to bypass global GitHub Actions top-of-the-hour queue drops.
+- [x] **Template-safe secrets guard**: `if: ${{ secrets.TELEGRAM_STRING_SESSION != '' }}` prevents unwanted error notifications on upstream template forks when secrets are not yet configured.
+- [x] **Node 24 upgrade**: Replaced deprecated actions with `actions/checkout@v6` and `setup-python@v6` for zero-warning runs.
+- [x] **Editable Python package layout**: Standard `src/` distribution with `pip install -e .` and console entrypoint `telegram-ai-summary`.
+
+---
+
+## 🚀 Upcoming Roadmap (Planned Enhancements)
+
+### Near Term
+- [ ] **Configurable destination target**: Custom channel or group chat ID routing via `TELEGRAM_TARGET_CHAT_ID`.
+- [ ] **Text-only fallback**: Send markdown text directly if Playwright dependencies fail in lightweight container environments.
+- [ ] **Interactive session generator wizard CLI**: Enhanced step-by-step terminal prompt for 2FA-protected accounts.
+
+### Medium Term
+- [ ] **Multi-theme support**: Add switchable CSS templates (*Modern Light*, *Cyberpunk*, *Minimalist Editorial*).
+- [ ] **Community leaderboard**: Highlight top contributors, most used emojis, and message volume metrics in the footer.
+- [ ] **Voice message transcription**: Process short Telegram voice notes using Gemini multimodal audio capabilities.
+- [ ] **Docker containerization**: Pre-built Docker image for self-hosted cron runs on VPS, NAS or local servers.

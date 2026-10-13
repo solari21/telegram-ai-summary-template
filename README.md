@@ -198,6 +198,14 @@ In your forked repo: **Settings** ➔ **Secrets and variables** ➔ **Actions** 
 
 ---
 
+## 📋 Project Status & Roadmap (TODO)
+
+For a complete checklist of implemented production milestones and upcoming planned enhancements, check out:
+👉 **[TODO.md](TODO.md)**
+
+---
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE) © 2026 Jesús Moronta ([@solari21](https://github.com/solari21)).
+
