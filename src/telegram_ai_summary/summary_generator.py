@@ -22,7 +22,7 @@ STYLE & TONE GUIDELINES:
 YOU MUST RETURN ONLY A STRICT VALID JSON OBJECT MATCHING THIS SCHEMA:
 {{
   "title": "CATCHY ALL-CAPS HUMOROUS HEADLINE",
-  "subtitle": "Funny subheadline describing the time window or mood",
+  "subtitle": "Witty subheadline tailored to the current time slot (e.g. overnight recap for morning, morning highlights for midday, afternoon wrap-up for evening)",
   "pills": [
     "📅 Date",
     "💬 {community_name}",
@@ -47,10 +47,18 @@ YOU MUST RETURN ONLY A STRICT VALID JSON OBJECT MATCHING THIS SCHEMA:
 
 def generate_summary(messages_data: list, current_slot: str = "") -> dict:
     if not messages_data:
+        s_lower = (current_slot or "").lower()
+        if "morning" in s_lower or "07:00" in s_lower or "matinal" in s_lower:
+            slot_sub = "Morning edition: calm night with minimal chat activity"
+        elif "midday" in s_lower or "14:30" in s_lower or "mediodía" in s_lower:
+            slot_sub = "Midday edition: everyone focused on work/studies"
+        else:
+            slot_sub = "Evening edition: peace and quiet across the community"
+
         return {
             "title": f"BOLETÍN TRANQUILO: {COMMUNITY_NAME.upper()}",
-            "subtitle": "Paz y tranquilidad en las trincheras",
-            "pills": [f"💬 {COMMUNITY_NAME}", "💤 Actividad mínima"],
+            "subtitle": slot_sub,
+            "pills": [f"💬 {COMMUNITY_NAME}", f"🕒 {current_slot or 'Current slot'}", "💤 Actividad mínima"],
             "sections": [
                 {
                     "icon": "🕹️",
@@ -60,7 +68,7 @@ def generate_summary(messages_data: list, current_slot: str = "") -> dict:
                         {
                             "user": "Sistema",
                             "badge_color": "blue",
-                            "content": "No se registraron mensajes destacables en esta franja. ¡Todos al día con sus quehaceres!"
+                            "content": f"No se registraron mensajes destacables en esta franja ({current_slot or 'reciente'}). ¡Todos al día con sus quehaceres!"
                         }
                     ]
                 }

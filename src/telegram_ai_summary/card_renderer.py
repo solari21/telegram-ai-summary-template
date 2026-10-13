@@ -22,7 +22,18 @@ def get_templates_dir() -> str:
 
     return pkg_templates
 
-async def render_summary_card(summary_data: dict, output_path: str = "output/summary_card.png") -> str:
+def get_default_slot_subtitle(slot_name: str = "", community_name: str = "") -> str:
+    s = (slot_name or "").lower()
+    comm = community_name or "Community"
+    if "morning" in s or "07:00" in s or "matinal" in s:
+        return f"{comm} • Morning edition: overnight chat and early bird highlights"
+    elif "midday" in s or "14:30" in s or "mediodía" in s or "mediodia" in s:
+        return f"{comm} • Midday edition: morning discussions and coffee break banter"
+    elif "evening" in s or "22:00" in s or "nocturna" in s:
+        return f"{comm} • Evening edition: afternoon highlights and prime-time wrap-up"
+    return f"{comm} • Highlights and active discussions"
+
+async def render_summary_card(summary_data: dict, output_path: str = "output/summary_card.png", current_slot: str = "") -> str:
     """
     Renders the structured JSON summary into a high-resolution PNG image
     using an HTML/CSS Jinja2 template and headless Chromium (Playwright).
@@ -37,11 +48,15 @@ async def render_summary_card(summary_data: dict, output_path: str = "output/sum
     now = datetime.now(ZoneInfo(TIMEZONE))
     footer_date = now.strftime("%d/%m/%Y %H:%M")
 
+    default_sub = get_default_slot_subtitle(current_slot or summary_data.get("slot", ""), COMMUNITY_NAME)
+    raw_sub = summary_data.get("subtitle", "").strip()
+    final_subtitle = default_sub if (not raw_sub or "no leídos" in raw_sub.lower() or "actividad reciente" in raw_sub.lower()) else raw_sub
+
     rendered_html = template.render(
         community_name=COMMUNITY_NAME,
         badge_top=f"🎙️ {COMMUNITY_NAME} • Daily Digest",
         title=summary_data.get("title", f"BOLETÍN {COMMUNITY_NAME.upper()}"),
-        subtitle=summary_data.get("subtitle", "Resumen de actividad reciente"),
+        subtitle=final_subtitle,
         pills=summary_data.get("pills", [f"💬 {COMMUNITY_NAME}"]),
         sections=summary_data.get("sections", []),
         footer_date=footer_date

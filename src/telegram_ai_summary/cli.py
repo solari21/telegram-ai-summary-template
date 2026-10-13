@@ -57,7 +57,7 @@ async def cmd_run(hours=None, output=None, no_send=False):
     summary_data = generate_summary(messages, current_slot=slot_name)
 
     output_path = output or f"output/summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-    img_path = await render_summary_card(summary_data, output_path=output_path)
+    img_path = await render_summary_card(summary_data, output_path=output_path, current_slot=slot_name)
 
     if not no_send:
         caption = f"🗞️ **{summary_data.get('title', 'COMMUNITY DIGEST')}**\n{summary_data.get('subtitle', '')}\n\n🕒 {slot_name}"
