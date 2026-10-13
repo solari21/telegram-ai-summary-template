@@ -60,12 +60,15 @@ flowchart LR
 The template includes **3 ready-to-use workflows**:
 
 ### 1. Slot Summaries (`daily_summary.yml`)
-* **07:00 Local** (Morning): Inspects the last 9 hours (overnight activity).
-* **14:30 Local** (Midday): Inspects the last 7.5 hours (morning work/study).
-* **22:00 Local** (Evening): Inspects the last 7.5 hours (afternoon/prime-time).
+Runs automatically 3 times daily using off-peak minutes (`:02` and `:32`) to prevent GitHub Actions top-of-the-hour queue drops:
+* **07:00 Local** (05:02 UTC in summer): Inspects the last 9 hours (overnight activity).
+* **14:30 Local** (12:32 UTC in summer): Inspects the last 7.5 hours (morning activity).
+* **22:00 Local** (20:02 UTC in summer): Inspects the last 7.5 hours (afternoon/prime-time).
+* *Delay resilience*: If the GitHub runner queue delays execution into the early morning, the horizon dynamically expands backwards to seamlessly connect with the 14:30 boundary of yesterday without missing messages.
 
 ### 2. Full Day Digest (`full_day_summary.yml`)
-* **23:59 Local**: Runs at midnight to collect and digest all messages from **00:00:00 to 23:59:59** of the current calendar day.
+* **23:59 Local** (21:58 UTC in summer): Runs at midnight to collect and digest all messages from **00:00:00 to 23:59:59**.
+* *Midnight Boundary Resilience*: If the runner is delayed past 00:00 (or if triggered manually during early morning hours 00:00 - 05:59), the engine automatically targets **yesterday's full calendar day** (00:00:00 to 23:59:59), guaranteeing 100% complete day summaries without empty outputs.
 
 ### 3. Manual Digest on Demand (`manual_summary.yml`)
 Dispatched manually via GitHub Actions with interactive inputs:

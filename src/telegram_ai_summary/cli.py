@@ -20,8 +20,12 @@ def get_slot_info(custom_hours=None, full_day=False, custom_title=None):
     hour = now.hour
 
     if full_day or os.environ.get("FULL_DAY", "").strip().lower() in ("true", "1", "yes") or os.environ.get("MODE", "").strip().lower() == "full-day":
+        if now.hour < 6:
+            target_date = (now - timedelta(days=1)).date()
+        else:
+            target_date = now.date()
         title_suffix = f": {custom_title}" if custom_title else ""
-        return f"Full Day Edition{title_suffix} ({now.strftime('%d/%m/%Y')} {TIMEZONE})", 24.0, True
+        return f"Full Day Edition{title_suffix} ({target_date.strftime('%d/%m/%Y')} {TIMEZONE})", 24.0, True
 
     if custom_hours is not None:
         title_suffix = f": {custom_title}" if custom_title else ""
@@ -40,8 +44,11 @@ def get_slot_info(custom_hours=None, full_day=False, custom_title=None):
         return f"Morning Edition (07:00 {TIMEZONE})", 9.0, False
     elif 11 <= hour < 18:
         return f"Midday Edition (14:30 {TIMEZONE})", 7.5, False
-    else:
+    elif 18 <= hour < 24:
         return f"Evening Edition (22:00 {TIMEZONE})", 7.5, False
+    else:
+        # Delayed night run
+        return f"Evening Edition (22:00 {TIMEZONE})", 7.5 + hour, False
 
 async def cmd_run(hours=None, full_day=False, custom_title=None, output=None, no_send=False):
     logging.basicConfig(

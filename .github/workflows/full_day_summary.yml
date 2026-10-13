@@ -2,8 +2,8 @@ name: Telegram AI - Full Day Digest (24 Hours)
 
 on:
   schedule:
-    # 23:59 Madrid time (CEST UTC+2 -> 21:59 UTC / CET UTC+1 -> 22:59 UTC)
-    - cron: '59 21 * * *'
+    # 23:59 Madrid time (CEST UTC+2 -> 21:59 UTC / CET UTC+1 -> 22:59 UTC) -> 21:58 UTC
+    - cron: '58 21 * * *'
   workflow_dispatch:
 
 jobs:

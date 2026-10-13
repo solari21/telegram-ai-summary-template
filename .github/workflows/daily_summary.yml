@@ -2,12 +2,12 @@ name: Telegram AI - Slot Summaries (Morning, Midday, Evening)
 
 on:
   schedule:
-    # 07:00 Madrid time (CEST UTC+2 -> 05:00 UTC / CET UTC+1 -> 06:00 UTC)
-    - cron: '0 5 * * *'
-    # 14:30 Madrid time (CEST UTC+2 -> 12:30 UTC / CET UTC+1 -> 13:30 UTC)
-    - cron: '30 12 * * *'
-    # 22:00 Madrid time (CEST UTC+2 -> 20:00 UTC / CET UTC+1 -> 21:00 UTC)
-    - cron: '0 20 * * *'
+    # 07:00 Madrid time (CEST UTC+2 -> 05:00 UTC) -> 05:02 UTC (avoids :00 peak congestion)
+    - cron: '2 5 * * *'
+    # 14:30 Madrid time (CEST UTC+2 -> 12:30 UTC) -> 12:32 UTC (avoids :30 peak congestion)
+    - cron: '32 12 * * *'
+    # 22:00 Madrid time (CEST UTC+2 -> 20:00 UTC) -> 20:02 UTC (avoids :00 peak congestion)
+    - cron: '2 20 * * *'
   workflow_dispatch:
 
 jobs:
