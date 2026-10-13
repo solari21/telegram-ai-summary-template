@@ -4,7 +4,15 @@ from dotenv import load_dotenv
 # Load .env file for local development if available
 load_dotenv()
 
-TELEGRAM_API_ID = int(os.environ.get("TELEGRAM_API_ID", 0))
+def _parse_int(val, default=0):
+    val_str = str(val or "").strip()
+    return int(val_str) if val_str else default
+
+def _parse_float(val, default=8.0):
+    val_str = str(val or "").strip()
+    return float(val_str) if val_str else default
+
+TELEGRAM_API_ID = _parse_int(os.environ.get("TELEGRAM_API_ID"), 0)
 TELEGRAM_API_HASH = os.environ.get("TELEGRAM_API_HASH", "").strip()
 TELEGRAM_STRING_SESSION = os.environ.get("TELEGRAM_STRING_SESSION", "").strip()
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
@@ -12,7 +20,7 @@ TELEGRAM_SEND_TO = os.environ.get("TELEGRAM_SEND_TO", "me").strip()
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 TIMEZONE = os.environ.get("TIMEZONE", "Europe/Madrid")
-HORAS_ATRAS = float(os.environ.get("HORAS_ATRAS", 8.0))
+HORAS_ATRAS = _parse_float(os.environ.get("HORAS_ATRAS"), 8.0)
 COMMUNITY_NAME = os.environ.get("COMMUNITY_NAME", "Comunidad Gamer").strip()
 
 def validate_config():

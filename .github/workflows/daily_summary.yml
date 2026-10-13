@@ -49,6 +49,6 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           COMMUNITY_NAME: ${{ vars.COMMUNITY_NAME || 'Comunidad Gamer' }}
           TIMEZONE: ${{ vars.TIMEZONE || 'Europe/Madrid' }}
-          HORAS_ATRAS: ${{ inputs.hours_back }}
+          HORAS_ATRAS: ${{ inputs.hours_back || '' }}
         run: |
           python main.py

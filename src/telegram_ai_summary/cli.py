@@ -22,7 +22,7 @@ def get_slot_info(custom_hours=None):
     if custom_hours is not None:
         return f"Manual Run ({now.strftime('%H:%M')} {TIMEZONE})", float(custom_hours)
 
-    env_hours = os.environ.get("HORAS_ATRAS")
+    env_hours = os.environ.get("HORAS_ATRAS", "").strip()
     if env_hours:
         try:
             return f"Manual Run ({now.strftime('%H:%M')} {TIMEZONE})", float(env_hours)
