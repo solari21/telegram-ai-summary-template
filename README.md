@@ -72,6 +72,9 @@ Dispatched manually via GitHub Actions with interactive inputs:
 * **`hours_back`**: Number of hours to inspect (default: `8`).
 * **`custom_title`**: Optional custom banner headline for the card.
 
+> [!TIP]
+> **Template-Safe Scheduled Crons**: The automated workflows include a built-in safety condition: scheduled cron runs only execute when `TELEGRAM_STRING_SESSION` and `GEMINI_API_KEY` secrets are configured. This prevents noisy failed run notifications on the upstream public template while activating seamlessly the moment you fork the repo and add your secrets!
+
 ---
 
 ## 🕹️ How to Trigger a Manual Digest from GitHub
