@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 import urllib.request
 import urllib.error
 from .config import GEMINI_API_KEY, COMMUNITY_NAME
@@ -96,8 +97,9 @@ Generate the structured JSON digest following all style and schema rules.
     candidate_models = [
         "gemini-3.8-flash",
         "gemini-3.5-flash",
-        "gemini-3.1-flash-lite",
-        "gemini-2.5-flash"
+        "gemini-3.5-flash-lite",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite"
     ]
     last_error = None
 
@@ -122,25 +124,43 @@ Generate the structured JSON digest following all style and schema rules.
 
     for model_name in candidate_models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=60) as response:
-                res_data = json.loads(response.read().decode("utf-8"))
-                raw_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
-                summary_json = json.loads(raw_text)
-                logger.info(f"Summary successfully generated via Gemini API ({model_name}).")
-                return summary_json
-        except urllib.error.HTTPError as e:
-            err_msg = e.read().decode("utf-8")
-            logger.warning(f"HTTP {e.code} on model {model_name}: {err_msg[:120]}. Trying next candidate...")
-            last_error = f"{e.code} - {err_msg}"
-        except Exception as e:
-            logger.warning(f"Error calling {model_name}: {e}. Trying next candidate...")
-            last_error = str(e)
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=60) as response:
+                    res_data = json.loads(response.read().decode("utf-8"))
+                    raw_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
+                    summary_json = json.loads(raw_text)
+                    logger.info(f"Summary successfully generated via Gemini API ({model_name}).")
+                    return summary_json
+            except urllib.error.HTTPError as e:
+                err_msg = e.read().decode("utf-8")
+                last_error = f"{e.code} - {err_msg}"
+                if e.code in (429, 500, 503, 504) and attempt < max_retries:
+                    backoff = (attempt + 1) * 3
+                    logger.warning(
+                        f"Transient HTTP {e.code} on {model_name}. Retrying in {backoff}s (attempt {attempt + 1}/{max_retries})..."
+                    )
+                    time.sleep(backoff)
+                    continue
+                else:
+                    logger.warning(f"HTTP {e.code} on model {model_name}: {err_msg[:120]}. Trying next candidate...")
+                    break
+            except Exception as e:
+                last_error = str(e)
+                if attempt < max_retries:
+                    backoff = (attempt + 1) * 2
+                    logger.warning(f"Error calling {model_name}: {e}. Retrying in {backoff}s...")
+                    time.sleep(backoff)
+                    continue
+                else:
+                    logger.warning(f"Error calling {model_name}: {e}. Trying next candidate...")
+                    break
 
     raise RuntimeError(f"All Gemini candidate models failed: {last_error}")
