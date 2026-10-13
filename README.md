@@ -29,7 +29,7 @@ Here is an example of the high-resolution infographic card automatically rendere
   1. **Slot Summaries**: Morning (07:00), Midday (14:30), and Evening (22:00) with slot-tailored subtitles and horizons.
   2. **Full Day Digest**: Automated midnight recap covering the entire 24h day (00:00 to 23:59).
   3. **On-Demand Manual Runs**: Launch anytime directly from GitHub Actions with custom hours (e.g. 2, 4, 8, 12, 24, 48) and custom card headlines.
-- 🧠 **Resilient 4-Model AI Cascade**: Built for cutting-edge **Google Gemini 3.8 Flash**, with an automatic fault-tolerant fallback cascade to **3.5 Flash**, **3.1 Flash Lite**, and **2.5 Flash** if Google experiences temporary peak demand (503) or rate limits.
+- 🧠 **Resilient 5-Model AI Cascade & Exponential Backoff**: Built for cutting-edge **Google Gemini 3.8 Flash**, with automated retries (3s / 6s backoff) and fault-tolerant fallbacks to **3.5 Flash**, **3.5 Flash Lite**, **2.0 Flash**, and **2.0 Flash Lite** to withstand Google server spikes (503 / 500 / 429).
 - 🎨 **Retina-Grade Dark-Mode Cards**: Custom Jinja2 HTML5/CSS3 template rendered with headless Chromium via Playwright at 2x device scale for razor-sharp typography and vibrant badges.
 - 🔐 **Zero-Leak Architecture**: Uses Telethon `StringSession` and GitHub Actions encrypted secrets. No SQLite session files stored on disk.
 - 🕒 **Smart Timezone & Slot Detection**: Automatically calculates inspection windows and converts all message timestamps to your local timezone (e.g. `Europe/Madrid`).
@@ -42,7 +42,7 @@ Here is an example of the high-resolution infographic card automatically rendere
 ```mermaid
 flowchart LR
     A["📱 Telegram Group\n(Supergroup)"] -->|"MTProto Client\n(Telethon)"| B["📥 Message Fetcher\n(Slot / 24h / Manual)"]
-    B -->|"Chronological Chat"| C["🧠 Gemini AI Engine\n(4-Model Cascade 3.8 ➔ 3.5 ➔ 3.1 ➔ 2.5)"]
+    B -->|"Chronological Chat"| C["🧠 Gemini AI Engine\n(5-Model Cascade 3.8 ➔ 3.5 ➔ 2.0 + Backoff)"]
     C -->|"Structured JSON Digest"| D["🎨 Template Engine\n(Jinja2 HTML/CSS + Dynamic Subtitles)"]
     D -->|"DOM Snapshot"| E["🌐 Playwright Chromium\n(2x Retina PNG)"]
     E -->|"High-Res Photo"| F["📤 Telegram Sender\n(Saved Messages / Channel)"]
@@ -174,7 +174,7 @@ In your forked repo: **Settings** ➔ **Secrets and variables** ➔ **Actions** 
 │       ├── cli.py                 # Multi-mode CLI entry point (--hours, --full-day)
 │       ├── config.py              # Robust environment configuration and parsers
 │       ├── mock_data.py           # Sample preview data
-│       ├── summary_generator.py   # Gemini API client with 4-model fallback cascade
+│       ├── summary_generator.py   # Gemini API client with 5-model cascade & backoff
 │       ├── telegram_fetcher.py    # MTProto message ingestion (slot and full-day)
 │       └── telegram_sender.py     # MTProto photo sender with markdown captions
 ├── templates/
