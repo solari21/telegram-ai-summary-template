@@ -1,0 +1,50 @@
+name: Telegram AI - Manual Digest on Demand
+
+on:
+  workflow_dispatch:
+    inputs:
+      hours_back:
+        description: 'Hours to look back (e.g. 2, 4, 8, 12, 24, 48)'
+        required: true
+        default: '8'
+      custom_title:
+        description: 'Custom headline for the infographic card (leave empty for automatic)'
+        required: false
+        default: ''
+
+jobs:
+  generate-manual-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🌐 Install Playwright Chromium headless browser
+        run: |
+          playwright install --with-deps chromium
+
+      - name: 🚀 Run On-Demand Digest Generator & Send to Telegram
+        env:
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          TELEGRAM_STRING_SESSION: ${{ secrets.TELEGRAM_STRING_SESSION }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_SEND_TO: ${{ secrets.TELEGRAM_SEND_TO || 'me' }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          COMMUNITY_NAME: ${{ vars.COMMUNITY_NAME || 'Comunidad Gamer' }}
+          TIMEZONE: ${{ vars.TIMEZONE || 'Europe/Madrid' }}
+        run: |
+          python -m telegram_ai_summary.cli run --hours "${{ inputs.hours_back }}" --custom-title "${{ inputs.custom_title }}"

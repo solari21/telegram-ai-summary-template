@@ -1,4 +1,4 @@
-name: Telegram AI Daily Summary Digest
+name: Telegram AI - Slot Summaries (Morning, Midday, Evening)
 
 on:
   schedule:
@@ -9,14 +9,9 @@ on:
     # 22:00 Madrid time (CEST UTC+2 -> 20:00 UTC / CET UTC+1 -> 21:00 UTC)
     - cron: '0 20 * * *'
   workflow_dispatch:
-    inputs:
-      hours_back:
-        description: 'Hours to look back (leave empty for automatic slot detection)'
-        required: false
-        default: '8'
 
 jobs:
-  generate-and-dispatch-digest:
+  generate-slot-digest:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -39,7 +34,7 @@ jobs:
         run: |
           playwright install --with-deps chromium
 
-      - name: 🚀 Run AI Digest Generator & Send to Telegram
+      - name: 🚀 Run Slot Digest Generator & Send to Telegram
         env:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
@@ -49,6 +44,5 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           COMMUNITY_NAME: ${{ vars.COMMUNITY_NAME || 'Comunidad Gamer' }}
           TIMEZONE: ${{ vars.TIMEZONE || 'Europe/Madrid' }}
-          HORAS_ATRAS: ${{ inputs.hours_back || '' }}
         run: |
-          python main.py
+          python -m telegram_ai_summary.cli run

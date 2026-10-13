@@ -14,29 +14,36 @@ from .telegram_sender import send_summary_image
 
 logger = logging.getLogger("telegram_ai_summary")
 
-def get_slot_info(custom_hours=None):
+def get_slot_info(custom_hours=None, full_day=False, custom_title=None):
     local_tz = ZoneInfo(TIMEZONE)
     now = datetime.now(local_tz)
     hour = now.hour
 
+    if full_day or os.environ.get("FULL_DAY", "").strip().lower() in ("true", "1", "yes") or os.environ.get("MODE", "").strip().lower() == "full-day":
+        title_suffix = f": {custom_title}" if custom_title else ""
+        return f"Full Day Edition{title_suffix} ({now.strftime('%d/%m/%Y')} {TIMEZONE})", 24.0, True
+
     if custom_hours is not None:
-        return f"Manual Run ({now.strftime('%H:%M')} {TIMEZONE})", float(custom_hours)
+        title_suffix = f": {custom_title}" if custom_title else ""
+        return f"Manual Run{title_suffix} ({now.strftime('%H:%M')} {TIMEZONE})", float(custom_hours), False
 
     env_hours = os.environ.get("HORAS_ATRAS", "").strip()
     if env_hours:
         try:
-            return f"Manual Run ({now.strftime('%H:%M')} {TIMEZONE})", float(env_hours)
+            env_t = custom_title or os.environ.get('CUSTOM_TITLE', '').strip()
+            title_suffix = f": {env_t}" if env_t else ""
+            return f"Manual Run{title_suffix} ({now.strftime('%H:%M')} {TIMEZONE})", float(env_hours), False
         except ValueError:
             pass
 
     if 5 <= hour < 11:
-        return f"Morning Edition (07:00 {TIMEZONE})", 9.0
+        return f"Morning Edition (07:00 {TIMEZONE})", 9.0, False
     elif 11 <= hour < 18:
-        return f"Midday Edition (14:30 {TIMEZONE})", 7.5
+        return f"Midday Edition (14:30 {TIMEZONE})", 7.5, False
     else:
-        return f"Evening Edition (22:00 {TIMEZONE})", 7.5
+        return f"Evening Edition (22:00 {TIMEZONE})", 7.5, False
 
-async def cmd_run(hours=None, output=None, no_send=False):
+async def cmd_run(hours=None, full_day=False, custom_title=None, output=None, no_send=False):
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -45,16 +52,19 @@ async def cmd_run(hours=None, output=None, no_send=False):
     logger.info(f"=== STARTING TELEGRAM AI DIGEST: {COMMUNITY_NAME.upper()} ===")
     validate_config()
 
-    slot_name, hours_back = get_slot_info(custom_hours=hours)
-    logger.info(f"Active Slot: {slot_name} | Inspection Horizon: Last {hours_back} hours.")
+    slot_name, hours_back, is_full_day = get_slot_info(custom_hours=hours, full_day=full_day, custom_title=custom_title)
+    logger.info(f"Active Slot: {slot_name} | Inspection Horizon: Last {hours_back} hours (Full Day: {is_full_day}).")
 
-    messages = await fetch_messages_since(hours_back=hours_back)
+    messages = await fetch_messages_since(hours_back=hours_back, full_day=is_full_day)
     if not messages:
         logger.info("No messages found in the inspection window. Concluded.")
         return
 
     logger.info(f"Generating AI digest for {len(messages)} messages with Gemini...")
     summary_data = generate_summary(messages, current_slot=slot_name)
+
+    if custom_title:
+        summary_data["title"] = custom_title.upper()
 
     output_path = output or f"output/summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
     img_path = await render_summary_card(summary_data, output_path=output_path, current_slot=slot_name)
@@ -124,6 +134,8 @@ def main():
     # Command: run
     run_parser = subparsers.add_parser("run", help="Fetch messages, generate digest, render card and dispatch to Telegram")
     run_parser.add_argument("--hours", type=float, default=None, help="Hours back to inspect")
+    run_parser.add_argument("--full-day", action="store_true", help="Fetch full day messages (00:00 to 23:59)")
+    run_parser.add_argument("--custom-title", type=str, default=None, help="Custom headline for the digest")
     run_parser.add_argument("--output", type=str, default=None, help="Output PNG path")
     run_parser.add_argument("--no-send", action="store_true", help="Generate infographic only without sending to Telegram")
 
@@ -138,9 +150,11 @@ def main():
 
     if args.command == "run" or args.command is None:
         hours = getattr(args, "hours", None)
+        full_day = getattr(args, "full_day", False)
+        custom_title = getattr(args, "custom_title", None)
         output = getattr(args, "output", None)
         no_send = getattr(args, "no_send", False)
-        asyncio.run(cmd_run(hours=hours, output=output, no_send=no_send))
+        asyncio.run(cmd_run(hours=hours, full_day=full_day, custom_title=custom_title, output=output, no_send=no_send))
     elif args.command == "session":
         asyncio.run(cmd_session())
     elif args.command == "demo":

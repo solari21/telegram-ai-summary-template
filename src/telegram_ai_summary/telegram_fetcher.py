@@ -21,13 +21,23 @@ def resolve_chat_id(target):
     except ValueError:
         return target
 
-async def fetch_messages_since(hours_back: float = 8.0) -> list:
+async def fetch_messages_since(hours_back: float = 8.0, full_day: bool = False) -> list:
     """
     Connects to Telegram via MTProto with StringSession and retrieves all text messages
-    posted within the last `hours_back` hours. Converts all timestamps to target timezone.
+    posted within the last `hours_back` hours or today's full day (since 00:00 local time).
+    Converts all timestamps to target timezone.
     """
     local_tz = ZoneInfo(TIMEZONE)
-    cutoff_utc = datetime.now(timezone.utc) - timedelta(hours=hours_back)
+    now_local = datetime.now(local_tz)
+
+    if full_day:
+        start_of_day_local = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+        cutoff_utc = start_of_day_local.astimezone(timezone.utc)
+        logger.info(f"FULL-DAY MODE active. Fetching since {start_of_day_local.strftime('%Y-%m-%d %H:%M:%S')} {TIMEZONE}...")
+    else:
+        cutoff_utc = datetime.now(timezone.utc) - timedelta(hours=hours_back)
+        logger.info(f"SLOT/MANUAL MODE active. Fetching messages since {cutoff_utc.isoformat()} (last {hours_back} hours)...")
+
     chat_target = resolve_chat_id(TELEGRAM_CHAT_ID)
 
     logger.info(f"Connecting to Telegram MTProto... Target chat: {chat_target}")
