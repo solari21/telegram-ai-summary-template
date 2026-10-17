@@ -74,6 +74,14 @@ jobs:
             echo "::warning::Missing secrets (TELEGRAM_STRING_SESSION or GEMINI_API_KEY). Skipping execution without failure."
             exit 0
           fi
-          python -m telegram_ai_summary.cli run \
-            --slot "${{ inputs.slot || github.event.client_payload.slot || '' }}" \
-            --cron-trigger "${{ github.event.schedule }}"
+          SLOT_VAL="${{ inputs.slot || github.event.client_payload.slot || '' }}"
+          CRON_VAL="${{ github.event.schedule || '' }}"
+          CMD="python -m telegram_ai_summary.cli run"
+          if [ -n "$CRON_VAL" ]; then
+            CMD="$CMD --cron-trigger \"$CRON_VAL\""
+          fi
+          if [ -n "$SLOT_VAL" ] && [ "$SLOT_VAL" != "auto" ]; then
+            CMD="$CMD --slot \"$SLOT_VAL\""
+          fi
+          echo "Executing: $CMD"
+          eval $CMD

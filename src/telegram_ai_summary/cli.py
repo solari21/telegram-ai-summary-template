@@ -290,16 +290,19 @@ def main():
 
     # Command: run
     run_parser = subparsers.add_parser("run", help="Fetch messages, generate digest, render card and dispatch to Telegram")
+    def clean_arg(val):
+        if not val:
+            return None
+        cleaned = str(val).strip().strip("'\"")
+        return cleaned if cleaned else None
+
     run_parser.add_argument(
         "--slot",
-        choices=[
-            "morning", "midday", "evening", "night", "full-day", "manual", "auto",
-            "matinal", "mediodia", "nocturna", "dia-completo"
-        ],
+        type=clean_arg,
         default=None,
-        help="Explicit time slot to execute"
+        help="Explicit time slot to execute (morning, midday, evening, full-day, manual, auto)"
     )
-    run_parser.add_argument("--cron-trigger", type=str, default=None, help="Cron expression that triggered the workflow")
+    run_parser.add_argument("--cron-trigger", type=clean_arg, default=None, help="Cron expression that triggered the workflow")
     run_parser.add_argument("--hours", type=float, default=None, help="Hours back to inspect in manual mode")
     run_parser.add_argument("--full-day", action="store_true", help="Fetch full day messages (00:00 to 23:59)")
     run_parser.add_argument("--custom-title", type=str, default=None, help="Custom headline for the digest")
