@@ -9,6 +9,7 @@ Living tracking document for the implementation status, verified production mile
 ### 1. Telegram MTProto Data Fetcher
 - [x] **Native MTProto client via Telethon & StringSession**: Secure user-account message collection without requiring third-party bot tokens.
 - [x] **Strict timezone normalization**: UTC timestamps converted to target community timezone (`TIMEZONE` setting, defaulting to `Europe/Madrid`).
+- [x] **Decoupled Fixed Time Windows**: Exact clock-window inspection horizons (Morning: 22:00 to 07:00, Midday: 07:00 to 14:30, Evening: 14:30 to 22:00, Full-Day: 00:00 to 23:59). Even if a runner experiences hours of delay, content, timestamps and titles remain 100% accurate without drift or mislabeling.
 - [x] **Multi-mode inspection horizons**: Supports relative time horizons (`--hours N`), automatic slot windows, and 24-hour calendar days (`--full-day`).
 - [x] **Midnight Boundary Resilience**: Automatic detection for early morning executions (00:00 - 05:59 local time), targeting **yesterday's full calendar day** (00:00:00 to 23:59:59) to prevent empty digests caused by GitHub Actions queue delays.
 - [x] **Dynamic slot window expansion**: Gracefully extends the inspection horizon backwards if runner queues delay the evening run past midnight.
@@ -29,11 +30,13 @@ Living tracking document for the implementation status, verified production mile
 - [x] **Headless Playwright Chromium renderer**: Ultra-crisp Retina x2 device scale factor capture.
 - [x] **Automated Telegram delivery**: Delivers rendered PNG directly to Telegram Saved Messages (`'me'`) or configurable chat.
 
-### 4. Serverless GitHub Actions Workflows & Packaging
+### 4. Serverless GitHub Actions Workflows & Cloud Schedulers
 - [x] **Triple workflow architecture**:
-  - `daily_summary.yml`: Automated slot digests (07:00, 14:30, 22:00 local).
-  - `full_day_summary.yml`: Automated 24-hour full-day digest (23:58 local).
-  - `manual_summary.yml`: Interactive on-demand dispatch with custom parameters.
+  - `daily_summary.yml`: Automated slot digests (07:00, 14:30, 22:00 local) with interactive dropdown selector (`slot: midday | morning | evening | auto`) and `repository_dispatch` webhooks.
+  - `full_day_summary.yml`: Automated 24-hour full-day digest (23:58 local) with `repository_dispatch`.
+  - `manual_summary.yml`: Interactive on-demand dispatch with custom parameters (`hours_back`, `custom_title`) and `repository_dispatch`.
+- [x] **100% Cloud Webhook Automation (cron-job.org compatibility)**: Full support for external cloud schedulers via GitHub `repository_dispatch` API to bypass GitHub Actions cron queue delays entirely.
+- [x] **Instant CLI Dispatch Utility (`tools/trigger_summary.py`)**: Trigger any workflow from local terminal with zero delay.
 - [x] **Anti-congestion off-peak cron minutes**: Configured at minutes `:02`, `:32`, and `:58` to bypass global GitHub Actions top-of-the-hour queue drops.
 - [x] **Template-safe secrets guard**: `if: ${{ secrets.TELEGRAM_STRING_SESSION != '' }}` prevents unwanted error notifications on upstream template forks when secrets are not yet configured.
 - [x] **Node 24 upgrade**: Replaced deprecated actions with `actions/checkout@v6` and `setup-python@v6` for zero-warning runs.

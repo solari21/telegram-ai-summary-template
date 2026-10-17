@@ -11,6 +11,9 @@ on:
         description: 'Custom headline for the infographic card (leave empty for automatic)'
         required: false
         default: ''
+  repository_dispatch:
+    types:
+      - manual_summary
 
 jobs:
   generate-manual-digest:
@@ -48,5 +51,10 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           COMMUNITY_NAME: ${{ vars.COMMUNITY_NAME || 'Comunidad Gamer' }}
           TIMEZONE: ${{ vars.TIMEZONE || 'Europe/Madrid' }}
+          HORAS_ATRAS: ${{ inputs.hours_back || github.event.client_payload.hours || '8' }}
+          CUSTOM_TITLE: ${{ inputs.custom_title || github.event.client_payload.custom_title || '' }}
+          GITHUB_EVENT_ACTION: ${{ github.event.action }}
         run: |
-          python -m telegram_ai_summary.cli run --hours "${{ inputs.hours_back }}" --custom-title "${{ inputs.custom_title }}"
+          python -m telegram_ai_summary.cli run \
+            --hours "${{ inputs.hours_back || github.event.client_payload.hours || '8' }}" \
+            --custom-title "${{ inputs.custom_title || github.event.client_payload.custom_title || '' }}"

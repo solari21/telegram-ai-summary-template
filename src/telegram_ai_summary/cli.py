@@ -14,43 +14,184 @@ from .telegram_sender import send_summary_image
 
 logger = logging.getLogger("telegram_ai_summary")
 
-def get_slot_info(custom_hours=None, full_day=False, custom_title=None):
+def resolve_execution_plan(args=None):
+    """
+    Decoupled calculation of slot identity, title, and exact fixed time window
+    in the configured timezone (e.g. Europe/Madrid), guaranteeing absolute
+    congruence against runner queue delays in GitHub Actions or cloud schedulers.
+    """
     local_tz = ZoneInfo(TIMEZONE)
     now = datetime.now(local_tz)
-    hour = now.hour
 
-    if full_day or os.environ.get("FULL_DAY", "").strip().lower() in ("true", "1", "yes") or os.environ.get("MODE", "").strip().lower() == "full-day":
+    cli_slot = getattr(args, "slot", None) if args else None
+    cli_cron = getattr(args, "cron_trigger", None) if args else None
+    cli_hours = getattr(args, "hours", None) if args else None
+    cli_full_day = getattr(args, "full_day", False) if args else False
+    cli_title = getattr(args, "custom_title", None) if args else None
+    cli_dry_run = getattr(args, "dry_run", False) or getattr(args, "no_send", False) if args else False
+    cli_output = getattr(args, "output", None) if args else None
+
+    env_slot = (
+        os.environ.get("SLOT") or
+        os.environ.get("INPUT_SLOT") or
+        os.environ.get("PAYLOAD_SLOT") or
+        ""
+    ).strip().lower()
+
+    env_cron = (
+        os.environ.get("GITHUB_EVENT_SCHEDULE") or
+        os.environ.get("GITHUB_CRON_TRIGGER") or
+        ""
+    ).strip()
+
+    env_action = os.environ.get("GITHUB_EVENT_ACTION", "").strip().lower()
+    env_mode = os.environ.get("MODE", "").strip().lower()
+    env_full_day = os.environ.get("FULL_DAY", "").strip().lower() in ("true", "1", "yes")
+    env_hours = os.environ.get("HORAS_ATRAS", "").strip()
+    env_title = os.environ.get("CUSTOM_TITLE", "").strip()
+
+    title_tag = cli_title or env_title or None
+
+    raw_slot = (cli_slot or env_slot).lower()
+    if raw_slot == "auto":
+        raw_slot = ""
+
+    slot_aliases = {
+        "matinal": "morning",
+        "mediodia": "midday",
+        "nocturna": "evening",
+        "night": "evening",
+        "dia-completo": "full-day",
+        "fullday": "full-day"
+    }
+    target_slot = slot_aliases.get(raw_slot, raw_slot)
+
+    # Autodetect from repository_dispatch event_type
+    if not target_slot and env_action:
+        if "morning" in env_action or "matinal" in env_action:
+            target_slot = "morning"
+        elif "midday" in env_action or "mediodia" in env_action:
+            target_slot = "midday"
+        elif "night" in env_action or "nocturna" in env_action or "evening" in env_action:
+            target_slot = "evening"
+        elif "full_day" in env_action or "dia_completo" in env_action:
+            target_slot = "full-day"
+
+    # Autodetect from cron schedule expression
+    active_cron = cli_cron or env_cron
+    if not target_slot and active_cron:
+        clean_cron = " ".join(active_cron.split())
+        if clean_cron in ("2 5 * * *", "0 5 * * *", "5 5 * * *"):
+            target_slot = "morning"
+        elif clean_cron in ("32 12 * * *", "30 12 * * *", "0 12 * * *"):
+            target_slot = "midday"
+        elif clean_cron in ("2 20 * * *", "0 20 * * *", "20 20 * * *"):
+            target_slot = "evening"
+        elif clean_cron in ("58 21 * * *", "59 21 * * *", "0 22 * * *"):
+            target_slot = "full-day"
+
+    # Full day mode check
+    is_full_day = (
+        target_slot == "full-day" or
+        bool(cli_full_day) or
+        env_full_day or
+        env_mode == "full-day"
+    )
+
+    if is_full_day:
         if now.hour < 6:
             target_date = (now - timedelta(days=1)).date()
         else:
             target_date = now.date()
-        title_suffix = f": {custom_title}" if custom_title else ""
-        return f"Full Day Edition{title_suffix} ({target_date.strftime('%d/%m/%Y')} {TIMEZONE})", 24.0, True
+        start_time = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0, tzinfo=local_tz)
+        end_time = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59, 999999, tzinfo=local_tz)
+        suffix = f": {title_tag}" if title_tag else ""
+        slot_name = f"Full Day Edition{suffix} ({target_date.strftime('%d/%m/%Y')} {TIMEZONE})"
+        return {
+            "slot": "full-day",
+            "slot_name": slot_name,
+            "hours_back": 24.0,
+            "is_full_day": True,
+            "start_time": start_time,
+            "end_time": end_time,
+            "custom_title": title_tag,
+            "dry_run": cli_dry_run,
+            "output": cli_output
+        }
 
-    if custom_hours is not None:
-        title_suffix = f": {custom_title}" if custom_title else ""
-        return f"Manual Run{title_suffix} ({now.strftime('%H:%M')} {TIMEZONE})", float(custom_hours), False
-
-    env_hours = os.environ.get("HORAS_ATRAS", "").strip()
-    if env_hours:
+    # Manual mode check
+    effective_hours = cli_hours or env_hours
+    if effective_hours is not None or target_slot == "manual":
         try:
-            env_t = custom_title or os.environ.get('CUSTOM_TITLE', '').strip()
-            title_suffix = f": {env_t}" if env_t else ""
-            return f"Manual Run{title_suffix} ({now.strftime('%H:%M')} {TIMEZONE})", float(env_hours), False
+            h_float = float(effective_hours) if effective_hours else 8.0
         except ValueError:
-            pass
+            h_float = 8.0
+        start_time = now - timedelta(hours=h_float)
+        end_time = now
+        suffix = f": {title_tag}" if title_tag else ""
+        slot_name = f"Manual Run{suffix} ({start_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')} {TIMEZONE})"
+        return {
+            "slot": "manual",
+            "slot_name": slot_name,
+            "hours_back": h_float,
+            "is_full_day": False,
+            "start_time": start_time,
+            "end_time": end_time,
+            "custom_title": title_tag,
+            "dry_run": cli_dry_run,
+            "output": cli_output
+        }
 
-    if 5 <= hour < 11:
-        return f"Morning Edition (07:00 {TIMEZONE})", 9.0, False
-    elif 11 <= hour < 18:
-        return f"Midday Edition (14:30 {TIMEZONE})", 7.5, False
-    elif 18 <= hour < 24:
-        return f"Evening Edition (22:00 {TIMEZONE})", 7.5, False
-    else:
-        # Delayed night run
-        return f"Evening Edition (22:00 {TIMEZONE})", 7.5 + hour, False
+    # Fallback to current time if no explicit slot provided
+    if not target_slot:
+        hour = now.hour
+        if 5 <= hour < 11:
+            target_slot = "morning"
+        elif 11 <= hour < 18:
+            target_slot = "midday"
+        else:
+            target_slot = "evening"
 
-async def cmd_run(hours=None, full_day=False, custom_title=None, output=None, no_send=False):
+    today = now.date()
+    yesterday = today - timedelta(days=1)
+
+    if target_slot == "morning":
+        start_time = datetime(yesterday.year, yesterday.month, yesterday.day, 22, 0, 0, tzinfo=local_tz)
+        end_time = datetime(today.year, today.month, today.day, 7, 0, 0, tzinfo=local_tz)
+        slot_name = f"Morning Edition (07:00 {TIMEZONE})"
+        hours_back = 9.0
+    elif target_slot == "midday":
+        start_time = datetime(today.year, today.month, today.day, 7, 0, 0, tzinfo=local_tz)
+        end_time = datetime(today.year, today.month, today.day, 14, 30, 0, tzinfo=local_tz)
+        slot_name = f"Midday Edition (14:30 {TIMEZONE})"
+        hours_back = 7.5
+    else:  # evening
+        if now.hour < 6:
+            # Runner started past midnight: analyze yesterday's evening
+            target_d = yesterday
+        else:
+            target_d = today
+        start_time = datetime(target_d.year, target_d.month, target_d.day, 14, 30, 0, tzinfo=local_tz)
+        end_time = datetime(target_d.year, target_d.month, target_d.day, 22, 0, 0, tzinfo=local_tz)
+        slot_name = f"Evening Edition (22:00 {TIMEZONE})"
+        hours_back = 7.5
+
+    if title_tag:
+        slot_name += f" - {title_tag}"
+
+    return {
+        "slot": target_slot,
+        "slot_name": slot_name,
+        "hours_back": hours_back,
+        "is_full_day": False,
+        "start_time": start_time,
+        "end_time": end_time,
+        "custom_title": title_tag,
+        "dry_run": cli_dry_run,
+        "output": cli_output
+    }
+
+async def cmd_run(args=None):
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -59,28 +200,37 @@ async def cmd_run(hours=None, full_day=False, custom_title=None, output=None, no
     logger.info(f"=== STARTING TELEGRAM AI DIGEST: {COMMUNITY_NAME.upper()} ===")
     validate_config()
 
-    slot_name, hours_back, is_full_day = get_slot_info(custom_hours=hours, full_day=full_day, custom_title=custom_title)
-    logger.info(f"Active Slot: {slot_name} | Inspection Horizon: Last {hours_back} hours (Full Day: {is_full_day}).")
+    plan = resolve_execution_plan(args)
+    logger.info(
+        f"Execution Plan: Slot '{plan['slot']}' | Name: '{plan['slot_name']}' | "
+        f"Window: {plan['start_time'].strftime('%Y-%m-%d %H:%M')} to {plan['end_time'].strftime('%Y-%m-%d %H:%M')} {TIMEZONE} "
+        f"(Full Day: {plan['is_full_day']}, Dry Run: {plan['dry_run']})"
+    )
 
-    messages = await fetch_messages_since(hours_back=hours_back, full_day=is_full_day)
+    messages = await fetch_messages_since(
+        hours_back=plan["hours_back"],
+        full_day=plan["is_full_day"],
+        start_time_local=plan["start_time"],
+        end_time_local=plan["end_time"]
+    )
     if not messages:
         logger.info("No messages found in the inspection window. Concluded.")
         return
 
     logger.info(f"Generating AI digest for {len(messages)} messages with Gemini...")
-    summary_data = generate_summary(messages, current_slot=slot_name)
+    summary_data = generate_summary(messages, current_slot=plan["slot_name"])
 
-    if custom_title:
-        summary_data["title"] = custom_title.upper()
+    if plan["custom_title"]:
+        summary_data["title"] = plan["custom_title"].upper()
 
-    output_path = output or f"output/summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-    img_path = await render_summary_card(summary_data, output_path=output_path, current_slot=slot_name)
+    output_path = plan["output"] or f"output/summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+    img_path = await render_summary_card(summary_data, output_path=output_path, current_slot=plan["slot_name"])
 
-    if not no_send:
-        caption = f"🗞️ **{summary_data.get('title', 'COMMUNITY DIGEST')}**\n{summary_data.get('subtitle', '')}\n\n🕒 {slot_name}"
+    if not plan["dry_run"]:
+        caption = f"🗞️ **{summary_data.get('title', 'COMMUNITY DIGEST')}**\n{summary_data.get('subtitle', '')}\n\n🕒 {plan['slot_name']}"
         await send_summary_image(img_path, caption=caption)
     else:
-        logger.info(f"--no-send specified. Infographic saved at: {img_path}")
+        logger.info(f"Dry-run / no-send active. Infographic successfully saved at: {img_path}")
 
     logger.info("=== WORKFLOW SUCCESSFULLY FINISHED ===")
 
@@ -140,11 +290,22 @@ def main():
 
     # Command: run
     run_parser = subparsers.add_parser("run", help="Fetch messages, generate digest, render card and dispatch to Telegram")
-    run_parser.add_argument("--hours", type=float, default=None, help="Hours back to inspect")
+    run_parser.add_argument(
+        "--slot",
+        choices=[
+            "morning", "midday", "evening", "night", "full-day", "manual", "auto",
+            "matinal", "mediodia", "nocturna", "dia-completo"
+        ],
+        default=None,
+        help="Explicit time slot to execute"
+    )
+    run_parser.add_argument("--cron-trigger", type=str, default=None, help="Cron expression that triggered the workflow")
+    run_parser.add_argument("--hours", type=float, default=None, help="Hours back to inspect in manual mode")
     run_parser.add_argument("--full-day", action="store_true", help="Fetch full day messages (00:00 to 23:59)")
     run_parser.add_argument("--custom-title", type=str, default=None, help="Custom headline for the digest")
     run_parser.add_argument("--output", type=str, default=None, help="Output PNG path")
-    run_parser.add_argument("--no-send", action="store_true", help="Generate infographic only without sending to Telegram")
+    run_parser.add_argument("--dry-run", action="store_true", help="Generate infographic without dispatching to Telegram")
+    run_parser.add_argument("--no-send", action="store_true", help="Alias for --dry-run")
 
     # Command: session
     subparsers.add_parser("session", help="Interactively generate a Telegram StringSession token")
@@ -156,12 +317,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == "run" or args.command is None:
-        hours = getattr(args, "hours", None)
-        full_day = getattr(args, "full_day", False)
-        custom_title = getattr(args, "custom_title", None)
-        output = getattr(args, "output", None)
-        no_send = getattr(args, "no_send", False)
-        asyncio.run(cmd_run(hours=hours, full_day=full_day, custom_title=custom_title, output=output, no_send=no_send))
+        asyncio.run(cmd_run(args))
     elif args.command == "session":
         asyncio.run(cmd_session())
     elif args.command == "demo":

@@ -9,13 +9,31 @@ on:
     # 22:00 Madrid time (CEST UTC+2 -> 20:00 UTC) -> 20:02 UTC (avoids :00 peak congestion)
     - cron: '2 20 * * *'
   workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Time slot to execute (forces slot window)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - 'midday'
+          - 'morning'
+          - 'evening'
+          - 'auto'
+  repository_dispatch:
+    types:
+      - morning_summary
+      - midday_summary
+      - evening_summary
+      - night_summary
+      - cron_trigger
 
 jobs:
   generate-slot-digest:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # On schedule, only run if secrets are configured (skips cleanly on upstream template without error emails)
-    if: ${{ github.event_name == 'workflow_dispatch' || (secrets.TELEGRAM_STRING_SESSION != '' && secrets.GEMINI_API_KEY != '') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'repository_dispatch' || (secrets.TELEGRAM_STRING_SESSION != '' && secrets.GEMINI_API_KEY != '') }}
 
     steps:
       - name: 📥 Checkout repository
@@ -48,5 +66,10 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           COMMUNITY_NAME: ${{ vars.COMMUNITY_NAME || 'Comunidad Gamer' }}
           TIMEZONE: ${{ vars.TIMEZONE || 'Europe/Madrid' }}
+          SLOT: ${{ inputs.slot || github.event.client_payload.slot || '' }}
+          GITHUB_EVENT_SCHEDULE: ${{ github.event.schedule }}
+          GITHUB_EVENT_ACTION: ${{ github.event.action }}
         run: |
-          python -m telegram_ai_summary.cli run
+          python -m telegram_ai_summary.cli run \
+            --slot "${{ inputs.slot || github.event.client_payload.slot || '' }}" \
+            --cron-trigger "${{ github.event.schedule }}"

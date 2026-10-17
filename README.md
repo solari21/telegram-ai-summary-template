@@ -61,37 +61,77 @@ The template includes **3 ready-to-use workflows**:
 
 ### 1. Slot Summaries (`daily_summary.yml`)
 Runs automatically 3 times daily using off-peak minutes (`:02` and `:32`) to prevent GitHub Actions top-of-the-hour queue drops:
-* **07:00 Local** (05:02 UTC in summer): Inspects the last 9 hours (overnight activity).
-* **14:30 Local** (12:32 UTC in summer): Inspects the last 7.5 hours (morning activity).
-* **22:00 Local** (20:02 UTC in summer): Inspects the last 7.5 hours (afternoon/prime-time).
-* *Delay resilience*: If the GitHub runner queue delays execution into the early morning, the horizon dynamically expands backwards to seamlessly connect with the 14:30 boundary of yesterday without missing messages.
+* **07:00 Local** (05:02 UTC in summer): Inspects the fixed window **22:00 (yesterday) to 07:00 (today)**.
+* **14:30 Local** (12:32 UTC in summer): Inspects the fixed window **07:00 to 14:30 (today)**.
+* **22:00 Local** (20:02 UTC in summer): Inspects the fixed window **14:30 to 22:00 (today)**.
+* *Queue Delay Decoupling*: Because inspection horizons are defined by fixed clock windows in your local timezone (`TIMEZONE`), even if a runner spends 2+ hours in a GitHub Actions queue, the summary content, timestamps, and badges remain **100% accurate and mathematically congruent**, never shifting into the next slot.
 
 ### 2. Full Day Digest (`full_day_summary.yml`)
 * **23:59 Local** (21:58 UTC in summer): Runs at midnight to collect and digest all messages from **00:00:00 to 23:59:59**.
 * *Midnight Boundary Resilience*: If the runner is delayed past 00:00 (or if triggered manually during early morning hours 00:00 - 05:59), the engine automatically targets **yesterday's full calendar day** (00:00:00 to 23:59:59), guaranteeing 100% complete day summaries without empty outputs.
 
 ### 3. Manual Digest on Demand (`manual_summary.yml`)
-Dispatched manually via GitHub Actions with interactive inputs:
+Dispatched manually via GitHub Actions or API webhook with interactive inputs:
 * **`hours_back`**: Number of hours to inspect (default: `8`).
 * **`custom_title`**: Optional custom banner headline for the card.
+
+---
+
+## ☁️ 100% Cloud Automation (Zero Queue Delays with `cron-job.org`)
+
+GitHub Actions' built-in scheduled crons run on shared community queues that can sometimes experience latency (from 10 minutes up to 2 hours during peak periods).
+
+To achieve **second-level punctuality** completely free without running any local machine:
+1. Create a free account at [cron-job.org](https://cron-job.org).
+2. Create 4 cron jobs targeting GitHub's `dispatches` endpoint:
+   - **URL**: `https://api.github.com/repos/<YOUR_GITHUB_USERNAME>/<YOUR_FORKED_REPO>/dispatches`
+   - **Method**: `POST`
+   - **Headers**:
+     - `Authorization`: `Bearer <YOUR_GITHUB_PAT>` *(needs `repo` or `workflow` scope)*
+     - `Accept`: `application/vnd.github+json`
+     - `Content-Type`: `application/json`
+3. **Payloads & Schedules**:
+   - **Morning (07:00 Local)**: `{"event_type": "morning_summary", "client_payload": {"slot": "morning"}}`
+   - **Midday (14:30 Local)**: `{"event_type": "midday_summary", "client_payload": {"slot": "midday"}}`
+   - **Evening (22:00 Local)**: `{"event_type": "evening_summary", "client_payload": {"slot": "evening"}}`
+   - **Full Day (23:58 Local)**: `{"event_type": "full_day_summary"}`
+
+*GitHub Actions starts the container within 10 seconds of receiving the webhook call, delivering your infographic to Telegram on the exact second!*
+
+---
+
+## ⚡ Instant Dispatch from CLI (`tools/trigger_summary.py`)
+
+You can also trigger any workflow instantly from your command line without opening GitHub's web interface:
+
+```bash
+# Set your GitHub PAT once:
+export GITHUB_TOKEN="ghp_xxxx"
+export GITHUB_REPOSITORY="your-user/your-repo"
+
+# Trigger midday edition:
+python tools/trigger_summary.py --slot midday
+
+# Trigger full 24h day digest:
+python tools/trigger_summary.py --full-day
+
+# Trigger manual on-demand run with custom title:
+python tools/trigger_summary.py --hours 6 --custom-title "WEEKEND TOURNAMENT"
+```
 
 > [!TIP]
 > **Template-Safe Scheduled Crons**: The automated workflows include a built-in safety condition: scheduled cron runs only execute when `TELEGRAM_STRING_SESSION` and `GEMINI_API_KEY` secrets are configured. This prevents noisy failed run notifications on the upstream public template while activating seamlessly the moment you fork the repo and add your secrets!
 
 ---
 
-## 🕹️ How to Trigger a Manual Digest from GitHub
+## 🕹️ How to Trigger a Manual Digest from GitHub Web
 
 1. Navigate to the **Actions** tab in your repository.
-2. Under **Workflows** on the left sidebar, click **Telegram AI - Manual Digest on Demand**.
-3. Click the **Run workflow** button on the right.
-4. Fill in the parameters:
-   * **Hours to look back**: e.g., `12` or `24`.
-   * **Custom headline**: e.g., `WEEKEND GAMING SPECIAL` (optional).
-5. Click the green **Run workflow** button.
-6. The job completes in ~40 seconds and dispatches the infographic directly to Telegram!
-
-*(You can also click **Run workflow** on «Telegram AI - Full Day Digest» to generate today's full 24h recap at any time).*
+2. Under **Workflows** on the left sidebar:
+   * Select **Telegram AI - Slot Summaries** ➔ click **Run workflow** (choose `midday`, `morning`, `evening`, or `auto`).
+   * Select **Telegram AI - Manual Digest on Demand** ➔ click **Run workflow** (enter hours and custom title).
+   * Select **Telegram AI - Full Day Digest** ➔ click **Run workflow**.
+3. The job completes in ~40 seconds and dispatches the infographic directly to Telegram!
 
 ---
 
