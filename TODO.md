@@ -38,7 +38,9 @@ Living tracking document for the implementation status, verified production mile
 - [x] **100% Cloud Webhook Automation (cron-job.org compatibility)**: Full support for external cloud schedulers via GitHub `repository_dispatch` API to bypass GitHub Actions cron queue delays entirely.
 - [x] **Instant CLI Dispatch Utility (`tools/trigger_summary.py`)**: Trigger any workflow from local terminal with zero delay.
 - [x] **Anti-congestion off-peak cron minutes**: Configured at minutes `:02`, `:32`, and `:58` to bypass global GitHub Actions top-of-the-hour queue drops.
-- [x] **Template-safe secrets guard**: `if: ${{ secrets.TELEGRAM_STRING_SESSION != '' }}` prevents unwanted error notifications on upstream template forks when secrets are not yet configured.
+- [x] **Template-safe secrets guard**: Workflow step guard `if [ -z "$TELEGRAM_STRING_SESSION" ]` gracefully skips runs on upstream template repository without failing when secrets are not configured, maintaining 100% green status on forks and templates.
+- [x] **Python 3.11 strict f-string compatibility (Rule II.24)**: Extracted backslashes outside f-string expressions in card rendering for flawless execution across all Python versions on Ubuntu GitHub runners.
+- [x] **CLI empty argument sanitization (`clean_arg`)**: Universal argument sanitizer ensuring empty strings in scheduled/webhook triggers do not cause CLI parsing errors.
 - [x] **Node 24 upgrade**: Replaced deprecated actions with `actions/checkout@v6` and `setup-python@v6` for zero-warning runs.
 - [x] **Editable Python package layout**: Standard `src/` distribution with `pip install -e .` and console entrypoint `telegram-ai-summary`.
 
