@@ -69,7 +69,8 @@ async def render_summary_card(summary_data: dict, output_path: str = "output/sum
     # 2. Render to PNG with Playwright async API
     abs_html_path = os.path.abspath(temp_html_path)
     abs_out_path = os.path.abspath(output_path)
-    file_url = f"file:///{abs_html_path.replace('\\', '/')}"
+    clean_html_path = abs_html_path.replace("\\", "/")
+    file_url = f"file:///{clean_html_path}"
 
     logger.info("Starting Playwright Chromium browser...")
     async with async_playwright() as p:
