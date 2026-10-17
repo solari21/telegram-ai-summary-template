@@ -55,6 +55,10 @@ jobs:
           CUSTOM_TITLE: ${{ inputs.custom_title || github.event.client_payload.custom_title || '' }}
           GITHUB_EVENT_ACTION: ${{ github.event.action }}
         run: |
+          if [ -z "$TELEGRAM_STRING_SESSION" ] || [ -z "$GEMINI_API_KEY" ]; then
+            echo "::warning::Missing secrets (TELEGRAM_STRING_SESSION or GEMINI_API_KEY). Skipping execution without failure."
+            exit 0
+          fi
           python -m telegram_ai_summary.cli run \
             --hours "${{ inputs.hours_back || github.event.client_payload.hours || '8' }}" \
             --custom-title "${{ inputs.custom_title || github.event.client_payload.custom_title || '' }}"
