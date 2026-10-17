@@ -13,8 +13,8 @@ jobs:
   generate-full-day-digest:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # On schedule, only run if secrets are configured (skips cleanly on upstream template without error emails)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'repository_dispatch' || (secrets.TELEGRAM_STRING_SESSION != '' && secrets.GEMINI_API_KEY != '') }}
+    # On schedule, only run if on a configured fork or manually triggered (skips scheduled runs on upstream template repository)
+    if: github.repository != 'solari21/telegram-ai-summary-template' || github.event_name != 'schedule'
 
     steps:
       - name: 📥 Checkout repository
@@ -49,4 +49,8 @@ jobs:
           TIMEZONE: ${{ vars.TIMEZONE || 'Europe/Madrid' }}
           GITHUB_EVENT_ACTION: ${{ github.event.action }}
         run: |
+          if [ -z "$TELEGRAM_STRING_SESSION" ] || [ -z "$GEMINI_API_KEY" ]; then
+            echo "::warning::Missing secrets (TELEGRAM_STRING_SESSION or GEMINI_API_KEY). Skipping execution without failure."
+            exit 0
+          fi
           python -m telegram_ai_summary.cli run --full-day
