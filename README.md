@@ -1,9 +1,9 @@
 # 🚀 Telegram AI Daily Summary Bot & Infographic Generator
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![Package](https://img.shields.io/badge/package-telegram--ai--summary-007EC6.svg?logo=pypi&logoColor=white)](https://github.com/solari21/telegram-ai-summary-template)
+[![Release](https://img.shields.io/badge/release-v0.2.0-blue.svg?logo=github)](https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.2.0)
 [![GitHub Actions](https://img.shields.io/badge/automation-GitHub_Actions-2088FF.svg?logo=github-actions&logoColor=white)](https://github.com/features/actions)
-[![Google Gemini API](https://img.shields.io/badge/AI-Google_Gemini_3_Flash-8E75B2.svg?logo=google&logoColor=white)](https://aistudio.google.com/)
+[![Google Gemini API](https://img.shields.io/badge/AI-Gemini_3.8_Flash_%26_Cascade-8E75B2.svg?logo=google&logoColor=white)](https://aistudio.google.com/)
 [![Telethon](https://img.shields.io/badge/telegram-Telethon_MTProto-2CA5E0.svg?logo=telegram&logoColor=white)](https://docs.telethon.dev/)
 [![Playwright](https://img.shields.io/badge/renderer-Playwright_Chromium-45ba4b.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -39,19 +39,13 @@ Here is an example of the high-resolution infographic card automatically rendere
 
 ## 🏛️ Architecture & Workflow
 
-```mermaid
-flowchart LR
-    A["📱 Telegram Group\n(Supergroup)"] -->|"MTProto Client\n(Telethon)"| B["📥 Message Fetcher\n(Slot / 24h / Manual)"]
-    B -->|"Chronological Chat"| C["🧠 Gemini AI Engine\n(5-Model Cascade 3.8 ➔ 3.5 ➔ 2.0 + Backoff)"]
-    C -->|"Structured JSON Digest"| D["🎨 Template Engine\n(Jinja2 HTML/CSS + Dynamic Subtitles)"]
-    D -->|"DOM Snapshot"| E["🌐 Playwright Chromium\n(2x Retina PNG)"]
-    E -->|"High-Res Photo"| F["📤 Telegram Sender\n(Saved Messages / Channel)"]
-
-    style A fill:#17212b,stroke:#2b5278,stroke-width:2px,color:#fff
-    style C fill:#2b1b3d,stroke:#7c3aed,stroke-width:2px,color:#fff
-    style E fill:#0d2818,stroke:#10b981,stroke-width:2px,color:#fff
-    style F fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
-```
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/architecture-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/architecture-light.svg">
+    <img alt="Telegram AI Daily Summary Architecture & Workflow" src="assets/architecture.svg" width="950">
+  </picture>
+</p>
 
 ---
 
@@ -215,6 +209,11 @@ In your forked repo: **Settings** ➔ **Secrets and variables** ➔ **Actions** 
 │       ├── manual_summary.yml     # On-demand manual digest with custom parameters
 │       └── publish_package.yml    # PyPI / GitHub Packages automated release
 ├── assets/
+│   ├── architecture-dark.png      # Retina @2x architecture diagram (dark)
+│   ├── architecture-dark.svg      # Standalone vector architecture (dark)
+│   ├── architecture-light.png     # Retina @2x architecture diagram (light)
+│   ├── architecture-light.svg     # Standalone vector architecture (light)
+│   ├── architecture.svg           # Universal architecture SVG
 │   └── demo_summary.png           # Showcase infographic sample image
 ├── output/                        # Local output folder (git-ignored)
 ├── src/
@@ -230,13 +229,16 @@ In your forked repo: **Settings** ➔ **Secrets and variables** ➔ **Actions** 
 │   └── card_template.html         # Responsive dark-mode infographic card template
 ├── tools/
 │   ├── generate_string_session.py # Interactive CLI tool to generate StringSession
-│   └── render_demo.py             # Offline mock card generator for demos
+│   ├── render_demo.py             # Offline mock card generator for demos
+│   ├── setup_windows_scheduler.ps1 # Optional Windows Task Scheduler registration
+│   └── trigger_summary.py         # Instant CLI trigger via GitHub REST API
 ├── .env.example                   # Environment variable template
 ├── .gitignore                     # Git ignore rules protecting all credentials
 ├── LICENSE                        # MIT License
 ├── main.py                        # Central bot orchestrator
 ├── pyproject.toml                 # Modern PEP 621 Python packaging config
-└── requirements.txt               # Lightweight Python dependencies
+├── requirements.txt               # Lightweight Python dependencies
+└── TODO.md                        # Living roadmap & completed milestones
 ```
 
 ---
