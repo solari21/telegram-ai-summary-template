@@ -43,6 +43,7 @@ Living tracking document for the implementation status, verified production mile
 - [x] **CLI empty argument sanitization (`clean_arg`)**: Universal argument sanitizer ensuring empty strings in scheduled/webhook triggers do not cause CLI parsing errors.
 - [x] **Node 24 upgrade**: Replaced deprecated actions with `actions/checkout@v6` and `setup-python@v6` for zero-warning runs.
 - [x] **Editable Python package layout**: Standard `src/` distribution with `pip install -e .` and console entrypoint `telegram-ai-summary`.
+- [x] **Official GitHub Release v0.2.0**: Published [v0.2.0](https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.2.0) with precompiled wheel (`.whl`) and source distribution (`.tar.gz`) attached via automated CI/CD.
 
 ---
 
