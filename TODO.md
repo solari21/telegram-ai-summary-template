@@ -44,13 +44,16 @@ Living tracking document for the implementation status, verified production mile
 - [x] **Node 24 upgrade**: Replaced deprecated actions with `actions/checkout@v6` and `setup-python@v6` for zero-warning runs.
 - [x] **Editable Python package layout**: Standard `src/` distribution with `pip install -e .` and console entrypoint `telegram-ai-summary`.
 - [x] **Official GitHub Release v0.2.0**: Published [v0.2.0](https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.2.0) with precompiled wheel (`.whl`) and source distribution (`.tar.gz`) attached via automated CI/CD.
+- [x] **Strict Bilingual Parity (`README.md` & `README_ES.md`)**: Complete technical documentation in English and Spanish with interactive top switcher.
+- [x] **Editorial Architecture Diagram (`diagram-design`)**: High-fidelity dark/light/universal SVGs and Retina @2x PNGs embedded with responsive `<picture>` tags.
+- [x] **Transversal 1:1 Parity with Production Bot (`reconectados-summary-bot`)**: Full synchronization of features, helper tools, and assets.
+- [x] **Configurable destination target (`TELEGRAM_SEND_TO`)**: Custom channel or group chat ID routing.
 
 ---
 
 ## 🚀 Upcoming Roadmap (Planned Enhancements)
 
 ### Near Term
-- [ ] **Configurable destination target**: Custom channel or group chat ID routing via `TELEGRAM_TARGET_CHAT_ID`.
 - [ ] **Text-only fallback**: Send markdown text directly if Playwright dependencies fail in lightweight container environments.
 - [ ] **Interactive session generator wizard CLI**: Enhanced step-by-step terminal prompt for 2FA-protected accounts.
 
