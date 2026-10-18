@@ -42,6 +42,7 @@ Living tracking document for the implementation status, verified production mile
 - [x] **Python 3.11 strict f-string compatibility (Rule II.24)**: Extracted backslashes outside f-string expressions in card rendering for flawless execution across all Python versions on Ubuntu GitHub runners.
 - [x] **CLI empty argument sanitization (`clean_arg`)**: Universal argument sanitizer ensuring empty strings in scheduled/webhook triggers do not cause CLI parsing errors.
 - [x] **Node 24 upgrade**: Replaced deprecated actions with `actions/checkout@v6` and `setup-python@v6` for zero-warning runs.
+- [x] **Decoupled CI/CD Version Resolution (`.github/scripts/resolve_version.py`)**: Eradicated inline `python -c` in `publish_package.yml`, preventing Bash quote stripping, shell collisions and `NameError` with unquoted booleans.
 - [x] **Editable Python package layout**: Standard `src/` distribution with `pip install -e .` and console entrypoint `telegram-ai-summary`.
 - [x] **Official GitHub Release v0.2.1**: Published [v0.2.1](https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.2.1) with precompiled wheels (`.whl`), Diagram Design architecture SVGs/PNGs, and dual-badge language switcher.
 - [x] **Previous Release v0.2.0**: Published [v0.2.0](https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.2.0) with precompiled wheel (`.whl`) and source distribution (`.tar.gz`) attached via automated CI/CD.
