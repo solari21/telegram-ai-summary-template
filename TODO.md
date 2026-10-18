@@ -43,7 +43,8 @@ Living tracking document for the implementation status, verified production mile
 - [x] **CLI empty argument sanitization (`clean_arg`)**: Universal argument sanitizer ensuring empty strings in scheduled/webhook triggers do not cause CLI parsing errors.
 - [x] **Node 24 upgrade**: Replaced deprecated actions with `actions/checkout@v6` and `setup-python@v6` for zero-warning runs.
 - [x] **Editable Python package layout**: Standard `src/` distribution with `pip install -e .` and console entrypoint `telegram-ai-summary`.
-- [x] **Official GitHub Release v0.2.0**: Published [v0.2.0](https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.2.0) with precompiled wheel (`.whl`) and source distribution (`.tar.gz`) attached via automated CI/CD.
+- [x] **Official GitHub Release v0.2.1**: Published [v0.2.1](https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.2.1) with precompiled wheels (`.whl`), Diagram Design architecture SVGs/PNGs, and dual-badge language switcher.
+- [x] **Previous Release v0.2.0**: Published [v0.2.0](https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.2.0) with precompiled wheel (`.whl`) and source distribution (`.tar.gz`) attached via automated CI/CD.
 - [x] **Strict Bilingual Parity (`README.md` & `README_ES.md`)**: Complete technical documentation in English and Spanish with interactive top switcher.
 - [x] **Editorial Architecture Diagram (`diagram-design`)**: High-fidelity dark/light/universal SVGs and Retina @2x PNGs embedded with responsive `<picture>` tags.
 - [x] **Transversal 1:1 Parity with Production Bot (`reconectados-summary-bot`)**: Full synchronization of features, helper tools, and assets.
