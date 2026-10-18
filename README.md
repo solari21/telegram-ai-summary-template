@@ -140,7 +140,10 @@ python tools/trigger_summary.py --hours 6 --custom-title "WEEKEND TOURNAMENT"
 You can install and use `telegram-ai-summary` directly in any environment via `pip`:
 
 ```bash
-# 1. Install directly from GitHub:
+# 1. Install directly via pip (Precompiled Wheel from Releases):
+pip install https://github.com/solari21/telegram-ai-summary-template/releases/download/v0.2.0/telegram_ai_summary-0.2.0-py3-none-any.whl
+
+# Or install from main branch source:
 pip install git+https://github.com/solari21/telegram-ai-summary-template.git
 
 # 2. Install Playwright browser dependencies:
