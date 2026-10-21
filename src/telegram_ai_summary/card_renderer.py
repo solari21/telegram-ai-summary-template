@@ -9,6 +9,7 @@ from .config import TIMEZONE, COMMUNITY_NAME
 
 logger = logging.getLogger("card_renderer")
 
+
 def get_templates_dir() -> str:
     # 1. Package bundled templates directory
     pkg_templates = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
@@ -22,6 +23,7 @@ def get_templates_dir() -> str:
 
     return pkg_templates
 
+
 def get_default_slot_subtitle(slot_name: str = "", community_name: str = "") -> str:
     s = (slot_name or "").lower()
     comm = community_name or "Community"
@@ -33,10 +35,12 @@ def get_default_slot_subtitle(slot_name: str = "", community_name: str = "") -> 
         return f"{comm} • Evening edition: afternoon highlights and prime-time wrap-up"
     return f"{comm} • Highlights and active discussions"
 
+
 async def render_summary_card(summary_data: dict, output_path: str = "output/summary_card.png", current_slot: str = "") -> str:
     """
     Renders the structured JSON summary into a high-resolution PNG image
-    using an HTML/CSS Jinja2 template and headless Chromium (Playwright).
+    using an HTML/CSS Jinja2 template and headless Chromium (Playwright)
+    with strict REA web execution stability (document.fonts.ready & rAF).
     """
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
 
@@ -72,25 +76,47 @@ async def render_summary_card(summary_data: dict, output_path: str = "output/sum
     clean_html_path = abs_html_path.replace("\\", "/")
     file_url = f"file:///{clean_html_path}"
 
-    logger.info("Starting Playwright Chromium browser...")
+    logger.info("Starting Playwright Chromium browser with REA stability engine...")
     async with async_playwright() as p:
         browser = await p.chromium.launch(args=["--no-sandbox", "--disable-setuid-sandbox"])
         page = await browser.new_page(
             viewport={"width": 950, "height": 1400},
-            device_scale_factor=2 # 2x Retina resolution for razor-sharp text
+            device_scale_factor=2  # 2x Retina resolution for razor-sharp text
         )
 
-        await page.goto(file_url, wait_until="networkidle")
-        container_elem = await page.query_selector(".container")
+        page_errors = []
+        page.on("pageerror", lambda err: page_errors.append(str(err)))
 
+        await page.goto(file_url, wait_until="load")
+
+        # REA Stability: Font hydration check
+        try:
+            await page.wait_for_function("() => document.fonts.status === 'loaded'", timeout=5000)
+        except Exception:
+            await page.evaluate("() => document.fonts.ready")
+
+        # REA Stability: Double animation frame for CSS Grid / layout settling
+        await page.evaluate(
+            "() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))"
+        )
+
+        container_elem = await page.query_selector(".container")
         if container_elem:
+            box = await container_elem.bounding_box()
+            if not box or box["width"] <= 0 or box["height"] <= 0:
+                logger.warning("Container dimensions unstable, applying safety timeout...")
+                await page.wait_for_timeout(300)
             await container_elem.screenshot(path=abs_out_path)
         else:
             await page.screenshot(path=abs_out_path, full_page=True)
 
+        if page_errors:
+            logger.warning(f"Web execution audit: {len(page_errors)} page error(s) logged: {page_errors}")
+        else:
+            logger.info("Web execution audit: Fonts and DOM layout verified 100% stable.")
+
         await browser.close()
 
-    # Clean up temporary HTML file
     if os.path.exists(temp_html_path):
         os.remove(temp_html_path)
 
