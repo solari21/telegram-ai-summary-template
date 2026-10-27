@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "telegram-ai-summary"
-version = "0.3.0"
+version = "0.4.0"
 description = "AI-powered infographic daily digest generator for Telegram communities with REA web stability"
 readme = "README.md"
 requires-python = ">=3.11"

@@ -2,8 +2,8 @@ name: Telegram AI - Full Day Digest (24 Hours)
 
 on:
   schedule:
-    # 23:58 Madrid time (CEST UTC+2 -> 21:58 UTC / CET UTC+1 -> 22:58 UTC)
-    - cron: '58 21 * * *'
+    # 23:58 Madrid time (CET UTC+1 -> 22:58 UTC)
+    - cron: '58 22 * * *'
   workflow_dispatch:
   repository_dispatch:
     types:
@@ -12,7 +12,7 @@ on:
 jobs:
   generate-full-day-digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     # On schedule, only run if on a configured fork or manually triggered (skips scheduled runs on upstream template repository)
     if: github.repository != 'solari21/telegram-ai-summary-template' || github.event_name != 'schedule'
 
@@ -32,9 +32,22 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
+      - name: 🌐 Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('requirements.txt') }}
+
       - name: 🌐 Install Playwright Chromium headless browser
         run: |
           playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: 🌐 Ensure Playwright system dependencies
+        run: |
+          playwright install-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: 🚀 Run Full Day Digest Generator (00:00 - 23:59) & Send to Telegram
         env:

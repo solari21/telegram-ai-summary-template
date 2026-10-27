@@ -7,7 +7,7 @@
   &nbsp;
   <img src="https://img.shields.io/badge/python-3.11+-blue.svg?style=flat&logo=python&logoColor=white" height="20" alt="Python Version" />
   &nbsp;
-  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.3.0"><img src="https://img.shields.io/badge/release-v0.3.0-blue.svg?style=flat&logo=github" height="20" alt="Release v0.3.0" /></a>
+  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.0"><img src="https://img.shields.io/badge/release-v0.4.0-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.0" /></a>
   &nbsp;
   <img src="https://img.shields.io/badge/REA%20MCP-Web%20Stability-success?style=flat&logo=shield&logoColor=white" height="20" alt="REA MCP Web Stability" />
   &nbsp;

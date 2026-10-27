@@ -77,17 +77,21 @@ def resolve_execution_plan(args=None):
         elif "full_day" in env_action or "dia_completo" in env_action:
             target_slot = "full-day"
 
-    # Autodetect from cron schedule expression
+    # Autodetect from cron schedule expression (CET winter and CEST summer)
     active_cron = cli_cron or env_cron
     if not target_slot and active_cron:
         clean_cron = " ".join(active_cron.split())
-        if clean_cron in ("2 5 * * *", "0 5 * * *", "5 5 * * *"):
+        # Morning: 07:00 Madrid (05:00 UTC CEST / 06:00 UTC CET)
+        if any(h in f" {clean_cron} " for h in [" 5 ", " 6 "]):
             target_slot = "morning"
-        elif clean_cron in ("32 12 * * *", "30 12 * * *", "0 12 * * *"):
+        # Midday: 14:30 Madrid (12:30 UTC CEST / 13:30 UTC CET)
+        elif any(h in f" {clean_cron} " for h in [" 12 ", " 13 "]):
             target_slot = "midday"
-        elif clean_cron in ("2 20 * * *", "0 20 * * *", "20 20 * * *"):
+        # Evening: 22:00 Madrid (20:00 UTC CEST / 21:00 UTC CET)
+        elif any(h in f" {clean_cron} " for h in [" 20 ", " 21 "]):
             target_slot = "evening"
-        elif clean_cron in ("58 21 * * *", "59 21 * * *", "0 22 * * *"):
+        # Full day: 23:58 Madrid (21:58 UTC CEST / 22:58 UTC CET)
+        elif any(h in f" {clean_cron} " for h in [" 21 ", " 22 "]):
             target_slot = "full-day"
 
     # Full day mode check
@@ -120,7 +124,7 @@ def resolve_execution_plan(args=None):
         }
 
     # Manual mode check
-    effective_hours = cli_hours or env_hours
+    effective_hours = cli_hours if cli_hours is not None else (float(env_hours) if env_hours else None)
     if effective_hours is not None or target_slot == "manual":
         try:
             h_float = float(effective_hours) if effective_hours else 8.0
@@ -179,6 +183,10 @@ def resolve_execution_plan(args=None):
     if title_tag:
         slot_name += f" - {title_tag}"
 
+    if end_time and end_time > now:
+        logger.info(f"Clamping end_time from {end_time.strftime('%H:%M')} to current time ({now.strftime('%H:%M')}) to avoid waiting for future messages.")
+        end_time = now
+
     return {
         "slot": target_slot,
         "slot_name": slot_name,
@@ -214,11 +222,11 @@ async def cmd_run(args=None):
         end_time_local=plan["end_time"]
     )
     if not messages:
-        logger.info("No messages found in the inspection window. Concluded.")
-        return
-
-    logger.info(f"Generating AI digest for {len(messages)} messages with Gemini...")
-    summary_data = generate_summary(messages, current_slot=plan["slot_name"])
+        logger.info(f"No messages found in inspection window '{plan['slot_name']}'. Generating contingency quiet digest...")
+        summary_data = generate_summary([], current_slot=plan["slot_name"])
+    else:
+        logger.info(f"Generating AI digest for {len(messages)} messages with Gemini...")
+        summary_data = generate_summary(messages, current_slot=plan["slot_name"])
 
     if plan["custom_title"]:
         summary_data["title"] = plan["custom_title"].upper()

@@ -2,12 +2,12 @@ name: Telegram AI - Slot Summaries (Morning, Midday, Evening)
 
 on:
   schedule:
-    # 07:00 Madrid time (CEST UTC+2 -> 05:00 UTC) -> 05:02 UTC (avoids :00 peak congestion)
-    - cron: '2 5 * * *'
-    # 14:30 Madrid time (CEST UTC+2 -> 12:30 UTC) -> 12:32 UTC (avoids :30 peak congestion)
-    - cron: '32 12 * * *'
-    # 22:00 Madrid time (CEST UTC+2 -> 20:00 UTC) -> 20:02 UTC (avoids :00 peak congestion)
-    - cron: '2 20 * * *'
+    # 07:00 Madrid time (CET UTC+1 -> 06:00 UTC) -> 06:02 UTC
+    - cron: '2 6 * * *'
+    # 14:30 Madrid time (CET UTC+1 -> 13:30 UTC) -> 13:32 UTC
+    - cron: '32 13 * * *'
+    # 22:00 Madrid time (CET UTC+1 -> 21:00 UTC) -> 21:02 UTC
+    - cron: '2 21 * * *'
   workflow_dispatch:
     inputs:
       slot:
@@ -31,7 +31,7 @@ on:
 jobs:
   generate-slot-digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     # On schedule, only run if on a configured fork or manually triggered (skips scheduled runs on upstream template repository)
     if: github.repository != 'solari21/telegram-ai-summary-template' || github.event_name != 'schedule'
 
@@ -51,9 +51,22 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
+      - name: 🌐 Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('requirements.txt') }}
+
       - name: 🌐 Install Playwright Chromium headless browser
         run: |
           playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: 🌐 Ensure Playwright system dependencies
+        run: |
+          playwright install-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: 🚀 Run Slot Digest Generator & Send to Telegram
         env:

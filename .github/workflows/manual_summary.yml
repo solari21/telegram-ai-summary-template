@@ -18,7 +18,7 @@ on:
 jobs:
   generate-manual-digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     steps:
       - name: 📥 Checkout repository
@@ -36,9 +36,22 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
+      - name: 🌐 Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('requirements.txt') }}
+
       - name: 🌐 Install Playwright Chromium headless browser
         run: |
           playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: 🌐 Ensure Playwright system dependencies
+        run: |
+          playwright install-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: 🚀 Run On-Demand Digest Generator & Send to Telegram
         env:
@@ -59,6 +72,4 @@ jobs:
             echo "::warning::Missing secrets (TELEGRAM_STRING_SESSION or GEMINI_API_KEY). Skipping execution without failure."
             exit 0
           fi
-          python -m telegram_ai_summary.cli run \
-            --hours "${{ inputs.hours_back || github.event.client_payload.hours || '8' }}" \
-            --custom-title "${{ inputs.custom_title || github.event.client_payload.custom_title || '' }}"
+          python -m telegram_ai_summary.cli run --hours "${{ inputs.hours_back || github.event.client_payload.hours || '8' }}" --custom-title "${{ inputs.custom_title || github.event.client_payload.custom_title || '' }}"
