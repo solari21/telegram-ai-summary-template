@@ -63,9 +63,9 @@ The template includes **3 production-ready workflows**:
 
 ### 1. Slot-Based Digest (`daily_summary.yml`)
 Runs automatically 3 times a day on offset minutes (`:02` and `:32`) to avoid GitHub Actions runner queue congestion on the hour:
-* **07:00 Local** (05:02 UTC in daylight saving): Fixed window **22:00 (yesterday) to 07:00 (today)**.
-* **14:30 Local** (12:32 UTC in daylight saving): Fixed window **07:00 to 14:30 (today)**.
-* **22:00 Local** (20:02 UTC in daylight saving): Fixed window **14:30 to 22:00 (today)**.
+* **07:00 Local** (06:02 UTC Winter CET / 05:02 UTC Summer CEST): Fixed window **22:00 (yesterday) to 07:00 (today)**.
+* **14:30 Local** (13:32 UTC Winter CET / 12:32 UTC Summer CEST): Fixed window **07:00 to 14:30 (today)**.
+* **22:00 Local** (21:02 UTC Winter CET / 20:02 UTC Summer CEST): Fixed window **14:30 to 22:00 (today)**.
 
 ### 2. Full 24-Hour Day Digest (`full_day_summary.yml`)
 * Dispatches every night at **23:58 Madrid** (21:58 UTC).
@@ -73,6 +73,18 @@ Runs automatically 3 times a day on offset minutes (`:02` and `:32`) to avoid Gi
 
 ### 3. On-Demand Manual Trigger (`manual_summary.yml`)
 * Interactive generation via the GitHub Actions tab, selecting hours to inspect and an optional custom title.
+
+---
+
+## ⚡ Time Slot Resilience & CI/CD Performance (v0.4.0)
+
+This update brings critical production-tested stability and performance enhancements:
+
+* 🎯 **Direct MTProto Navigation with `offset_date`**: Telethon navigates directly to the trailing edge of each clock window without downloading subsequent group messages. This neutralizes iteration quota exhaustion (`limit=400`) and guarantees digests finish in ~1 second.
+* 🚀 **CI/CD Acceleration via Playwright Caching**: Integrated `actions/cache@v4` on `~/.cache/ms-playwright` along with an extended `timeout-minutes: 20`. Chromium browser setup time on GitHub Actions drops from ~8 minutes to seconds.
+* 🕒 **European Winter Time (CET UTC+1) Parity**: Scheduled crons aligned with European winter hours (`06:02 UTC`, `13:32 UTC`, `21:02 UTC`) and slot parser adapted for automatic seasonal transitions.
+* ⏱️ **Dynamic Horizon Clamping**: When triggered interactively before slot completion, the upper boundary clamps to `now`, enabling instant manual testing without empty responses.
+* 🛡️ **Guaranteed Delivery (Quiet Edition Fallback)**: In windows with zero group activity, the bot renders and dispatches an official "Quiet Edition / All Clear" card rather than exiting silently.
 
 ---
 

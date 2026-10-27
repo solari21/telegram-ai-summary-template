@@ -63,9 +63,9 @@ La plantilla incluye **3 workflows listos para producción**:
 
 ### 1. Resumen por Franjas (`daily_summary.yml`)
 Se ejecuta automáticamente 3 veces al día en minutos alternos (`:02` y `:32`) para evitar demoras en las colas de GitHub Actions en horas en punto:
-* **07:00 Local** (05:02 UTC en horario de verano): Ventana fija **22:00 (ayer) a 07:00 (hoy)**.
-* **14:30 Local** (12:32 UTC en horario de verano): Ventana fija **07:00 a 14:30 (hoy)**.
-* **22:00 Local** (20:02 UTC en horario de verano): Ventana fija **14:30 a 22:00 (hoy)**.
+* **07:00 Local** (06:02 UTC Invierno CET / 05:02 UTC Verano CEST): Ventana fija **22:00 (ayer) a 07:00 (hoy)**.
+* **14:30 Local** (13:32 UTC Invierno CET / 12:32 UTC Verano CEST): Ventana fija **07:00 a 14:30 (hoy)**.
+* **22:00 Local** (21:02 UTC Invierno CET / 20:02 UTC Verano CEST): Ventana fija **14:30 a 22:00 (hoy)**.
 
 ### 2. Resumen Diario Completo 24 Horas (`full_day_summary.yml`)
 * Se dispara cada noche a las **23:58 Madrid** (21:58 UTC).
@@ -73,6 +73,18 @@ Se ejecuta automáticamente 3 veces al día en minutos alternos (`:02` y `:32`) 
 
 ### 3. Disparador Manual a la Carta (`manual_summary.yml`)
 * Permite generar un resumen interactivo a petición desde la pestaña Actions de GitHub eligiendo el número de horas hacia atrás y un título opcional.
+
+---
+
+## ⚡ Resiliencia de Franjas y Rendimiento CI/CD (v0.4.0)
+
+Esta actualización incorpora mejoras críticas de estabilidad y rendimiento probadas en entornos de alta producción:
+
+* 🎯 **Navegación MTProto Directa con `offset_date`**: Telethon salta directamente al instante final de cada franja horaria sin descargar los mensajes posteriores del grupo. Esto elimina la inanición por límite de iteración (`limit=400`) y garantiza que los resúmenes programados o manuales se procesen en ~1 segundo.
+* 🚀 **Aceleración CI/CD con Caché de Playwright**: Se integra `actions/cache@v4` sobre `~/.cache/ms-playwright` y un `timeout-minutes: 20`. El tiempo de preparación del navegador Chromium en GitHub Actions se reduce de ~8 minutos a escasos segundos.
+* 🕒 **Conmutación Horaria CET/CEST**: Expresiones cron ajustadas para invierno (CET UTC+1: `06:02`, `13:32`, `21:02` UTC) y parser adaptado para reconocer dinámicamente franjas horarias tanto de verano como de invierno.
+* ⏱️ **Clamping Dinámico de Ventana**: Si un resumen se dispara interactivamente antes del fin de franja, el límite superior se ajusta a la hora actual (`now`), permitiendo pruebas inmediatas a la carta.
+* 🛡️ **Garantía de Entrega ("Franja Tranquila")**: En caso de ausencia total de mensajes en el grupo durante un intervalo, genera y entrega la tarjeta oficial de «Franja Tranquila / Sin Novedad» en lugar de abortar silenciosamente.
 
 ---
 

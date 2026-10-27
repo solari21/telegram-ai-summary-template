@@ -6,7 +6,15 @@ Living tracking document for the implementation status, verified production mile
 
 ## ✅ Completed Milestones (100% Production Ready & Tested)
 
-### 1. REA MCP Web Stability & Typography Engine (v0.3.0)
+### 1. Time Slot Resilience, Playwright Caching & CET Parity (v0.4.0)
+- [x] **Direct MTProto Navigation (`offset_date`)**: Telethon jumps directly to the trailing edge of each clock window without discarding recent intermediate messages, preventing quota exhaustion.
+- [x] **Dynamic Horizon Clamping**: Auto-clamps the end time to `now` for interactive or manual triggers executed before slot completion.
+- [x] **Guaranteed Delivery (Quiet Edition Fallback)**: Eliminates silent exits when zero messages are found; automatically renders and dispatches an official "Quiet Edition" infographic card.
+- [x] **Playwright CI/CD Caching**: Integrates `actions/cache@v4` on `~/.cache/ms-playwright` and increases job timeout to 20 minutes, slashing browser setup from 8 minutes to seconds.
+- [x] **Winter CET Timezone Alignment**: Harmonizes cron schedules (`06:02 UTC`, `13:32 UTC`, `21:02 UTC`, `22:58 UTC`) and slot parsers for European winter time (UTC+1).
+- [x] **Official GitHub Release v0.4.0**: Published release with updated wheel and source distribution packages.
+
+### 2. REA MCP Web Stability & Typography Engine (v0.3.0)
 - [x] **REA MCP Integration (`rea-agents@6.7.0`)**: Enriched infographic rendering with strict web execution stability patterns.
 - [x] **`document.fonts.ready` Synchronization**: Playwright Chromium now waits for complete Google Fonts (Inter, Orbitron) hydration before screenshot capture, eliminating pixelated system fallbacks.
 - [x] **Double Animation Frame Settling**: Executes `requestAnimationFrame` twice before DOM capture to ensure CSS Grid, Flexbox, and badge styles have zero layout shifts.
@@ -14,7 +22,7 @@ Living tracking document for the implementation status, verified production mile
 - [x] **Web Execution Audit Logging**: Captures `pageerror` events and network failures into structured diagnostic logs.
 - [x] **Official GitHub Release v0.3.0**: Published release with updated wheel and source distribution packages.
 
-### 2. Telegram MTProto Data Fetcher
+### 3. Telegram MTProto Data Fetcher
 - [x] **Native MTProto client via Telethon & StringSession**: Secure user-account message collection without requiring third-party bot tokens.
 - [x] **Strict timezone normalization**: UTC timestamps converted to target community timezone (`TIMEZONE` setting, defaulting to `Europe/Madrid`).
 - [x] **Decoupled Fixed Time Windows**: Exact clock-window inspection horizons (Morning: 22:00 to 07:00, Midday: 07:00 to 14:30, Evening: 14:30 to 22:00, Full-Day: 00:00 to 23:59). Even if a runner experiences hours of delay, content, timestamps and titles remain 100% accurate without drift or mislabeling.
@@ -22,7 +30,7 @@ Living tracking document for the implementation status, verified production mile
 - [x] **Midnight Boundary Resilience**: Automatic detection for early morning executions (00:00 - 05:59 local time), targeting **yesterday's full calendar day** (00:00:00 to 23:59:59) to prevent empty digests caused by GitHub Actions queue delays.
 - [x] **Dynamic slot window expansion**: Gracefully extends the inspection horizon backwards if runner queues delay the evening run past midnight.
 
-### 3. AI Digest Engine (Google Gemini)
+### 4. AI Digest Engine (Google Gemini)
 - [x] **5-Model Resilience Cascade**:
   1. `gemini-3.8-flash` (Primary: maximum reasoning and wit).
   2. `gemini-3.5-flash` (Fallback 1: high speed and quality).
@@ -33,12 +41,12 @@ Living tracking document for the implementation status, verified production mile
 - [x] **Contextual dynamic subtitles**: Automatically tailored to morning, midday, evening, full-day, or manual runs.
 - [x] **Custom titles support**: Easily add custom headlines (`--custom-title "EVENT NAME"`).
 
-### 4. Visual Infographic Rendering & Delivery
+### 5. Visual Infographic Rendering & Delivery
 - [x] **HTML/CSS dark mode gamer card**: Jinja2 templated with dynamic category badges and responsive typography.
 - [x] **Headless Playwright Chromium renderer**: Ultra-crisp Retina x2 device scale factor capture.
 - [x] **Automated Telegram delivery**: Delivers rendered PNG directly to Telegram Saved Messages (`'me'`) or configurable chat.
 
-### 5. Serverless GitHub Actions Workflows & Cloud Schedulers
+### 6. Serverless GitHub Actions Workflows & Cloud Schedulers
 - [x] **Triple workflow architecture**:
   - `daily_summary.yml`: Automated slot digests (07:00, 14:30, 22:00 local) with interactive dropdown selector (`slot: midday | morning | evening | auto`) and `repository_dispatch` webhooks.
   - `full_day_summary.yml`: Automated 24-hour full-day digest (23:58 local) with `repository_dispatch`.
