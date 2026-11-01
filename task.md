@@ -1,14 +1,14 @@
-# Task: Time Slot Resilience, Playwright Browser Caching & CET Timezone Parity (v0.4.0)
+# Task: Structured Outputs & Anti-Crash Resilience (v0.4.1)
 
 ## Objective
-Harmonize the public template with production fixes: eliminate quota starvation on manual triggers using `offset_date`, clamp interactive executions to current time, guarantee delivery during quiet periods, cache Playwright browser binaries to accelerate CI/CD, and align scheduled crons with winter CET time (UTC+1).
+Harmonize the public template with production fixes: eliminate `AttributeError: 'list' object has no attribute 'get'` by enforcing `responseSchema` in the Gemini API and introducing a universal defensive normalization layer in both summary generation and card rendering.
 
 ## Checklist
-- [x] 1. `offset_date` extraction in Telethon client.
-- [x] 2. Dynamic window clamping for interactive runs.
-- [x] 3. Guaranteed contingency infographic for zero-message windows.
-- [x] 4. Playwright caching (`actions/cache@v4` on `~/.cache/ms-playwright`) and 20m timeout.
-- [x] 5. Winter CET timezone alignment (UTC+1).
+- [x] 1. `responseSchema` specification in Gemini API `generationConfig`.
+- [x] 2. Defensive `normalize_summary_data` helper handling lists, wrapped dicts, and missing keys.
+- [x] 3. Double-layer protection in `card_renderer.py`.
+- [x] 4. Refreshed active candidate models cascade (`gemini-3.7-flash`, `gemini-3.6-flash`, etc.).
+- [x] 5. Trimmed socket read timeout to 40s.
 - [x] 6. Clean AST audit (`verify_ast_clean.py`).
 - [x] 7. Build wheel and source distributions in `dist/`.
-- [x] 8. Semantic bump to `v0.4.0` and official GitHub Release.
+- [x] 8. Semantic bump to `v0.4.1` and official GitHub Release.

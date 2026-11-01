@@ -7,7 +7,7 @@
   &nbsp;
   <img src="https://img.shields.io/badge/python-3.11+-blue.svg?style=flat&logo=python&logoColor=white" height="20" alt="Python Version" />
   &nbsp;
-  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.0"><img src="https://img.shields.io/badge/release-v0.4.0-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.0" /></a>
+  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.1"><img src="https://img.shields.io/badge/release-v0.4.1-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.1" /></a>
   &nbsp;
   <img src="https://img.shields.io/badge/REA%20MCP-Web%20Stability-success?style=flat&logo=shield&logoColor=white" height="20" alt="REA MCP Web Stability" />
   &nbsp;
@@ -76,7 +76,16 @@ Se ejecuta automáticamente 3 veces al día en minutos alternos (`:02` y `:32`) 
 
 ---
 
-## ⚡ Resiliencia de Franjas y Rendimiento CI/CD (v0.4.0)
+## ⚡ Blindaje Estructurado y Resiliencia Anti-Crash (v0.4.1)
+
+Esta versión resuelve de raíz los fallos de tipo (`AttributeError: 'list' object has no attribute 'get'`) cuando un modelo LLM devuelve un array en lugar de un objeto raíz:
+
+* 🛡️ **Esquema Estricto `responseSchema` en Gemini API**: Configurado esquema formal OpenAPI 3.0 para obligar a los modelos a generar un objeto diccionario raíz.
+* 🧩 **Normalización Universal (`normalize_summary_data`)**: Procesa y estandariza defensivamente cualquier formato de respuesta de IA (diccionario, lista de 1 elemento, o lista de secciones) tanto en generación como en renderizado.
+* 🚀 **Cascada de Modelos Actualizada**: Añadidos `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3-flash-preview` y `gemini-flash-lite-latest`, purgando endpoints 404 y optimizando timeouts a 40s.
+
+### Hitos Previos (v0.4.0)
+Esta actualización incorporó mejoras de estabilidad y rendimiento:
 
 Esta actualización incorpora mejoras críticas de estabilidad y rendimiento probadas en entornos de alta producción:
 

@@ -7,7 +7,7 @@
   &nbsp;
   <img src="https://img.shields.io/badge/python-3.11+-blue.svg?style=flat&logo=python&logoColor=white" height="20" alt="Python Version" />
   &nbsp;
-  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.0"><img src="https://img.shields.io/badge/release-v0.4.0-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.0" /></a>
+  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.1"><img src="https://img.shields.io/badge/release-v0.4.1-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.1" /></a>
   &nbsp;
   <img src="https://img.shields.io/badge/REA%20MCP-Web%20Stability-success?style=flat&logo=shield&logoColor=white" height="20" alt="REA MCP Web Stability" />
   &nbsp;
@@ -76,7 +76,16 @@ Runs automatically 3 times a day on offset minutes (`:02` and `:32`) to avoid Gi
 
 ---
 
-## ⚡ Time Slot Resilience & CI/CD Performance (v0.4.0)
+## ⚡ Structured Outputs & Defensive Resilience (v0.4.1)
+
+This update resolves type mismatch errors (`AttributeError: 'list' object has no attribute 'get'`) caused when fallback LLM models return JSON arrays:
+
+* 🛡️ **Enforced `responseSchema` in Gemini API**: Added OpenAPI 3.0 schema to ensure Gemini models output a strictly typed root object.
+* 🧩 **Universal Defensive Normalization (`normalize_summary_data`)**: Automatically standardizes any LLM output format (direct dict, wrapped list, or bare section list) across generation and rendering.
+* 🚀 **Refreshed Model Cascade**: Integrated `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3-flash-preview`, and `gemini-flash-lite-latest`, removing 404 endpoints and tuning failover timeouts to 40s.
+
+### Prior Milestones (v0.4.0)
+This update brought critical production-tested stability and performance enhancements:
 
 This update brings critical production-tested stability and performance enhancements:
 

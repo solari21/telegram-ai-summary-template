@@ -46,6 +46,118 @@ YOU MUST RETURN ONLY A STRICT VALID JSON OBJECT MATCHING THIS SCHEMA:
 }}
 """
 
+SUMMARY_RESPONSE_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "title": {"type": "STRING"},
+        "subtitle": {"type": "STRING"},
+        "pills": {"type": "ARRAY", "items": {"type": "STRING"}},
+        "sections": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "icon": {"type": "STRING"},
+                    "title": {"type": "STRING"},
+                    "tagline": {"type": "STRING"},
+                    "entries": {
+                        "type": "ARRAY",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "user": {"type": "STRING"},
+                                "badge_color": {"type": "STRING"},
+                                "content": {"type": "STRING"}
+                            },
+                            "required": ["user", "content"]
+                        }
+                    }
+                },
+                "required": ["title", "entries"]
+            }
+        }
+    },
+    "required": ["title", "subtitle", "sections"]
+}
+
+def normalize_summary_data(summary_json, current_slot: str = "") -> dict:
+    """
+    Ensures the summary data object is strictly a valid dictionary matching
+    the required template schema, resilient to any variations returned by LLMs
+    (direct object, wrapped list, or direct list of sections).
+    """
+    default_sub = "Humorous daily digest of recent community activity and highlights"
+    s_lower = (current_slot or "").lower()
+    if "full" in s_lower or "24h" in s_lower or "completo" in s_lower:
+        default_sub = "The definitive full-day community debrief (00:00 - 23:59)"
+    elif "morning" in s_lower or "07:00" in s_lower or "matinal" in s_lower:
+        default_sub = "Overnight chronicles while normal people were asleep"
+    elif "midday" in s_lower or "14:30" in s_lower or "mediodía" in s_lower:
+        default_sub = "Morning highlights and pre-lunch banter"
+    elif "evening" in s_lower or "22:00" in s_lower or "nocturna" in s_lower:
+        default_sub = "Afternoon chronicles and prime-time gaming sessions"
+
+    if isinstance(summary_json, list):
+        if len(summary_json) == 1 and isinstance(summary_json[0], dict):
+            summary_json = summary_json[0]
+        elif len(summary_json) > 1 and all(isinstance(item, dict) for item in summary_json):
+            root_candidate = next((item for item in summary_json if "sections" in item and isinstance(item["sections"], list)), None)
+            if root_candidate:
+                summary_json = root_candidate
+            else:
+                summary_json = {
+                    "title": f"DIGEST: {COMMUNITY_NAME.upper()}",
+                    "subtitle": default_sub,
+                    "pills": [f"💬 {COMMUNITY_NAME}", f"🕒 {current_slot or 'Local'}"],
+                    "sections": summary_json
+                }
+        elif len(summary_json) > 0 and isinstance(summary_json[0], dict):
+            summary_json = summary_json[0]
+        else:
+            summary_json = {}
+
+    if not isinstance(summary_json, dict):
+        summary_json = {}
+
+    if not summary_json.get("title") or not isinstance(summary_json.get("title"), str):
+        summary_json["title"] = f"DIGEST: {COMMUNITY_NAME.upper()}"
+
+    if not summary_json.get("subtitle") or not isinstance(summary_json.get("subtitle"), str):
+        summary_json["subtitle"] = default_sub
+
+    if not isinstance(summary_json.get("pills"), list):
+        summary_json["pills"] = [f"💬 {COMMUNITY_NAME}", f"🕒 {current_slot or 'Local'}"]
+
+    raw_sections = summary_json.get("sections")
+    clean_sections = []
+    if isinstance(raw_sections, list):
+        for sec in raw_sections:
+            if isinstance(sec, dict):
+                entries = sec.get("entries")
+                clean_entries = []
+                if isinstance(entries, list):
+                    for e in entries:
+                        if isinstance(e, dict):
+                            clean_entries.append({
+                                "user": str(e.get("user", "Member")),
+                                "badge_color": str(e.get("badge_color", "blue")),
+                                "content": str(e.get("content", ""))
+                            })
+                        elif isinstance(e, str):
+                            clean_entries.append({
+                                "user": "Member",
+                                "badge_color": "blue",
+                                "content": e
+                            })
+                clean_sections.append({
+                    "icon": str(sec.get("icon", "🎮")),
+                    "title": str(sec.get("title", "Highlights")),
+                    "tagline": str(sec.get("tagline", "")),
+                    "entries": clean_entries
+                })
+    summary_json["sections"] = clean_sections
+    return summary_json
+
 def generate_summary(messages_data: list, current_slot: str = "") -> dict:
     if not messages_data:
         s_lower = (current_slot or "").lower()
@@ -96,10 +208,12 @@ Generate the structured JSON digest following all style and schema rules.
 
     candidate_models = [
         "gemini-3.8-flash",
+        "gemini-3.7-flash",
+        "gemini-3.6-flash",
         "gemini-3.5-flash",
         "gemini-3.5-flash-lite",
-        "gemini-2.0-flash",
-        "gemini-2.0-flash-lite"
+        "gemini-3-flash-preview",
+        "gemini-flash-lite-latest"
     ]
     last_error = None
 
@@ -118,6 +232,7 @@ Generate the structured JSON digest following all style and schema rules.
         },
         "generationConfig": {
             "responseMimeType": "application/json",
+            "responseSchema": SUMMARY_RESPONSE_SCHEMA,
             "temperature": 0.7
         }
     }
@@ -133,12 +248,13 @@ Generate the structured JSON digest following all style and schema rules.
                 method="POST"
             )
             try:
-                with urllib.request.urlopen(req, timeout=60) as response:
+                with urllib.request.urlopen(req, timeout=40) as response:
                     res_data = json.loads(response.read().decode("utf-8"))
                     raw_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
                     summary_json = json.loads(raw_text)
+                    clean_summary = normalize_summary_data(summary_json, current_slot=current_slot)
                     logger.info(f"Summary successfully generated via Gemini API ({model_name}).")
-                    return summary_json
+                    return clean_summary
             except urllib.error.HTTPError as e:
                 err_msg = e.read().decode("utf-8")
                 last_error = f"{e.code} - {err_msg}"

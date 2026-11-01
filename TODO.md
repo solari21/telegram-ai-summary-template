@@ -6,7 +6,14 @@ Living tracking document for the implementation status, verified production mile
 
 ## ✅ Completed Milestones (100% Production Ready & Tested)
 
-### 1. Time Slot Resilience, Playwright Caching & CET Parity (v0.4.0)
+### 1. Structured Outputs & Anti-Crash Resilience (v0.4.1)
+- [x] **Enforced `responseSchema` in Gemini API**: Configured strict OpenAPI 3.0 schema to ensure root dictionary structure from Google Gemini models.
+- [x] **Defensive Normalization Pipeline (`normalize_summary_data`)**: Built-in support for wrapped arrays, section lists, or direct dicts across generation and card rendering.
+- [x] **Refreshed Model Cascade**: Added `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3-flash-preview`, and `gemini-flash-lite-latest`, pruning obsolete endpoints.
+- [x] **Failover Timeout Optimization**: Set to 40s for fast candidate switching during Google Gemini API traffic spikes.
+- [x] **Official GitHub Release v0.4.1**: Published release with compiled wheel and source distributions.
+
+### 2. Time Slot Resilience, Playwright Caching & CET Parity (v0.4.0)
 - [x] **Direct MTProto Navigation (`offset_date`)**: Telethon jumps directly to the trailing edge of each clock window without discarding recent intermediate messages, preventing quota exhaustion.
 - [x] **Dynamic Horizon Clamping**: Auto-clamps the end time to `now` for interactive or manual triggers executed before slot completion.
 - [x] **Guaranteed Delivery (Quiet Edition Fallback)**: Eliminates silent exits when zero messages are found; automatically renders and dispatches an official "Quiet Edition" infographic card.

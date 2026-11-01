@@ -6,6 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from playwright.async_api import async_playwright
 
 from .config import TIMEZONE, COMMUNITY_NAME
+from .summary_generator import normalize_summary_data
 
 logger = logging.getLogger("card_renderer")
 
@@ -44,7 +45,8 @@ async def render_summary_card(summary_data: dict, output_path: str = "output/sum
     """
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
 
-    # 1. Prepare template variables
+    # 1. Normalize summary data & prepare template variables
+    summary_data = normalize_summary_data(summary_data, current_slot=current_slot)
     templates_dir = get_templates_dir()
     env = Environment(loader=FileSystemLoader(templates_dir))
     template = env.get_template("card_template.html")
