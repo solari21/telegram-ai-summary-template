@@ -6,6 +6,12 @@ Living tracking document for the implementation status, verified production mile
 
 ## ✅ Completed Milestones (100% Production Ready & Tested)
 
+### 0. Versioned Playwright Cache & CI/CD Self-Healing (v0.4.2)
+- [x] **Dynamic Playwright version detection**: Extracts the installed Playwright version (`playwright --version`) into `GITHUB_OUTPUT` prior to cache lookup.
+- [x] **Versioned `actions/cache@v4` key**: Embeds `${{ steps.playwright-version.outputs.version }}` in the `~/.cache/ms-playwright` cache key, auto-invalidating stale browser caches whenever Playwright updates on PyPI.
+- [x] **Unconditional self-healing install**: Runs `playwright install --with-deps chromium` after cache restore (no-op when matching binary is present, auto-downloads if missing).
+- [x] **Official GitHub Release v0.4.2**: Published release with compiled wheel and source distributions.
+
 ### 1. Structured Outputs & Anti-Crash Resilience (v0.4.1)
 - [x] **Enforced `responseSchema` in Gemini API**: Configured strict OpenAPI 3.0 schema to ensure root dictionary structure from Google Gemini models.
 - [x] **Defensive Normalization Pipeline (`normalize_summary_data`)**: Built-in support for wrapped arrays, section lists, or direct dicts across generation and card rendering.

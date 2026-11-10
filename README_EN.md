@@ -7,7 +7,7 @@
   &nbsp;
   <img src="https://img.shields.io/badge/python-3.11+-blue.svg?style=flat&logo=python&logoColor=white" height="20" alt="Python Version" />
   &nbsp;
-  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.1"><img src="https://img.shields.io/badge/release-v0.4.1-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.1" /></a>
+  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.2"><img src="https://img.shields.io/badge/release-v0.4.2-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.2" /></a>
   &nbsp;
   <img src="https://img.shields.io/badge/REA%20MCP-Web%20Stability-success?style=flat&logo=shield&logoColor=white" height="20" alt="REA MCP Web Stability" />
   &nbsp;
@@ -76,7 +76,14 @@ Runs automatically 3 times a day on offset minutes (`:02` and `:32`) to avoid Gi
 
 ---
 
-## ⚡ Structured Outputs & Defensive Resilience (v0.4.1)
+## ⚡ Versioned Playwright Cache & CI/CD Self-Healing (v0.4.2)
+
+This patch release hardens GitHub Actions workflows against upstream Playwright PyPI upgrades (`Executable doesn't exist` when restoring stale Chromium browser caches):
+
+* 🔍 **Playwright-Versioned Cache Key**: Every workflow (`daily_summary.yml`, `full_day_summary.yml`, `manual_summary.yml`) dynamically detects the installed Playwright version (`playwright --version`) and embeds it in the `actions/cache@v4` key, automatically invalidating stale caches whenever PyPI ships a newer Playwright release even if `requirements.txt` is unchanged.
+* 🛡️ **Self-Healing Chromium Verification**: Removed the conditional skip on `cache-hit == 'true'`; `playwright install --with-deps chromium` now runs unconditionally after cache restore (instant no-op when the matching revision exists, self-healing if missing or incomplete).
+
+### Prior Milestones (v0.4.1)
 
 This update resolves type mismatch errors (`AttributeError: 'list' object has no attribute 'get'`) caused when fallback LLM models return JSON arrays:
 

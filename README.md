@@ -7,7 +7,7 @@
   &nbsp;
   <img src="https://img.shields.io/badge/python-3.11+-blue.svg?style=flat&logo=python&logoColor=white" height="20" alt="Python Version" />
   &nbsp;
-  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.1"><img src="https://img.shields.io/badge/release-v0.4.1-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.1" /></a>
+  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.2"><img src="https://img.shields.io/badge/release-v0.4.2-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.2" /></a>
   &nbsp;
   <img src="https://img.shields.io/badge/REA%20MCP-Web%20Stability-success?style=flat&logo=shield&logoColor=white" height="20" alt="REA MCP Web Stability" />
   &nbsp;
@@ -76,7 +76,14 @@ Se ejecuta automáticamente 3 veces al día en minutos alternos (`:02` y `:32`) 
 
 ---
 
-## ⚡ Blindaje Estructurado y Resiliencia Anti-Crash (v0.4.1)
+## ⚡ Blindaje de Caché Playwright y Auto-Reparación CI/CD (v0.4.2)
+
+Esta versión blinda los workflows de GitHub Actions frente a actualizaciones de Playwright en PyPI (`Executable doesn't exist` al restaurar cachés antiguos de Chromium):
+
+* 🔍 **Clave de Caché Versionada por Playwright**: Cada workflow (`daily_summary.yml`, `full_day_summary.yml`, `manual_summary.yml`) detecta dinámicamente la versión exacta instalada (`playwright --version`) e inyecta dicho identificador en la clave de `actions/cache@v4`, invalidando automáticamente cachés obsoletos ante nuevas versiones en PyPI aunque `requirements.txt` no cambie.
+* 🛡️ **Verificación Auto-Reparadora de Chromium**: Eliminado el salto condicional de `playwright install` ante `cache-hit == 'true'`; ahora `playwright install --with-deps chromium` se ejecuta siempre tras restaurar la caché (instantáneo si el binario coincide y auto-reparador si falta o está incompleto).
+
+### Hitos Previos (v0.4.1)
 
 Esta versión resuelve de raíz los fallos de tipo (`AttributeError: 'list' object has no attribute 'get'`) cuando un modelo LLM devuelve un array en lugar de un objeto raíz:
 
