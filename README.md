@@ -7,7 +7,7 @@
   &nbsp;
   <img src="https://img.shields.io/badge/python-3.11+-blue.svg?style=flat&logo=python&logoColor=white" height="20" alt="Python Version" />
   &nbsp;
-  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.2"><img src="https://img.shields.io/badge/release-v0.4.2-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.2" /></a>
+  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.3"><img src="https://img.shields.io/badge/release-v0.4.3-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.3" /></a>
   &nbsp;
   <img src="https://img.shields.io/badge/REA%20MCP-Web%20Stability-success?style=flat&logo=shield&logoColor=white" height="20" alt="REA MCP Web Stability" />
   &nbsp;
@@ -76,7 +76,13 @@ Se ejecuta automáticamente 3 veces al día en minutos alternos (`:02` y `:32`) 
 
 ---
 
-## ⚡ Blindaje de Caché Playwright y Auto-Reparación CI/CD (v0.4.2)
+## ⚡ Guía Anti-Duplicados en Programación Cloud (v0.4.3)
+
+Sincronización con la mejora de producción (`v1.2.3` en `reconectados-summary-bot`):
+
+* ⏱️ **Prevención de Crones Duplicados (`cron-job.org` vs `schedule`)**: Documentado explícitamente en `daily_summary.yml` y `full_day_summary.yml` que, si activas un planificador externo (`cron-job.org` vía `repository_dispatch`), debes comentar o eliminar el bloque `on: schedule:` para evitar ejecuciones duplicadas con retrasos de 3–9 horas en las colas gratuitas de GitHub Actions.
+
+### Hitos Previos (v0.4.2)
 
 Esta versión blinda los workflows de GitHub Actions frente a actualizaciones de Playwright en PyPI (`Executable doesn't exist` al restaurar cachés antiguos de Chromium):
 

@@ -74,4 +74,5 @@ Living tracking document for the implementation status, verified production mile
 - [x] **Decoupled CI/CD Version Resolution (`.github/scripts/resolve_version.py`)**: Eradicated inline `python -c` in `publish_package.yml`, preventing Bash quote stripping, shell collisions and `NameError` with unquoted booleans.
 - [x] **Editable Python package layout**: Standard `src/` distribution with `pip install -e .` and console entrypoint `telegram-ai-summary`.
 - [x] **Strict Bilingual Parity (`README.md` & `README_EN.md`)**: Complete technical documentation in English and Spanish with interactive top switcher.
+- [x] **Anti-duplication scheduling guidance (`v0.4.3`)**: Documented in workflows and READMEs to disable `on: schedule:` when using `cron-job.org` (`repository_dispatch`) so free-tier GitHub cron delays (3–9h) do not generate duplicate out-of-hours digests.
 - [x] **Editorial Architecture Diagram (`diagram-design`)**: High-fidelity dark/light/universal SVGs and Retina @2x PNGs embedded with responsive `<picture>` tags.

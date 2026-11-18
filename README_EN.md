@@ -7,7 +7,7 @@
   &nbsp;
   <img src="https://img.shields.io/badge/python-3.11+-blue.svg?style=flat&logo=python&logoColor=white" height="20" alt="Python Version" />
   &nbsp;
-  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.2"><img src="https://img.shields.io/badge/release-v0.4.2-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.2" /></a>
+  <a href="https://github.com/solari21/telegram-ai-summary-template/releases/tag/v0.4.3"><img src="https://img.shields.io/badge/release-v0.4.3-blue.svg?style=flat&logo=github" height="20" alt="Release v0.4.3" /></a>
   &nbsp;
   <img src="https://img.shields.io/badge/REA%20MCP-Web%20Stability-success?style=flat&logo=shield&logoColor=white" height="20" alt="REA MCP Web Stability" />
   &nbsp;
@@ -76,7 +76,13 @@ Runs automatically 3 times a day on offset minutes (`:02` and `:32`) to avoid Gi
 
 ---
 
-## ⚡ Versioned Playwright Cache & CI/CD Self-Healing (v0.4.2)
+## ⚡ Anti-Duplication Cloud Scheduling Guidance (v0.4.3)
+
+Synchronized with production (`v1.2.3` in `reconectados-summary-bot`):
+
+* ⏱️ **Preventing Duplicate Cron Runs (`cron-job.org` vs `schedule`)**: Explicitly documented in `daily_summary.yml` and `full_day_summary.yml` that when using an external scheduler (`cron-job.org` via `repository_dispatch`), you should remove or comment out `on: schedule:` to prevent duplicate digests delayed 3–9+ hours by GitHub Actions' free-tier cron queue.
+
+### Prior Milestones (v0.4.2)
 
 This patch release hardens GitHub Actions workflows against upstream Playwright PyPI upgrades (`Executable doesn't exist` when restoring stale Chromium browser caches):
 

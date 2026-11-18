@@ -1,6 +1,8 @@
 name: Telegram AI - Slot Summaries (Morning, Midday, Evening)
 
 on:
+  # NOTE: If you use an external scheduler like cron-job.org (repository_dispatch),
+  # remove or comment out this `schedule` block to avoid duplicate, 3-9h delayed runs.
   schedule:
     # 07:00 Madrid time (CET UTC+1 -> 06:00 UTC) -> 06:02 UTC
     - cron: '2 6 * * *'

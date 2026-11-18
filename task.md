@@ -1,4 +1,16 @@
-# Task: Versioned Playwright Cache & CI/CD Self-Healing (v0.4.2)
+# Task: Anti-Duplication Cloud Scheduling Guidance (v0.4.3)
+
+## Objective
+Synchronize the public template with the production fix in `reconectados-summary-bot` (`v1.2.3`), documenting in workflows and bilingual docs that `on: schedule:` must be disabled when using `cron-job.org` (`repository_dispatch`) to avoid duplicate, 3–9h delayed runs.
+
+## Checklist (v0.4.3)
+- [x] 1. Added explicit anti-duplication warnings above `schedule:` in `daily_summary.yml` and `full_day_summary.yml`.
+- [x] 2. Bumped version in `pyproject.toml` to `0.4.3` and rebuilt `dist/*`.
+- [x] 3. Bilingual docs parity (`README.md`, `README_EN.md`, `TODO.md`, `walkthrough.md`), Release `v0.4.3`, and Projects V2 Done.
+
+---
+
+# Task (Historical): Versioned Playwright Cache & CI/CD Self-Healing (v0.4.2)
 
 ## Objective
 Prevent `BrowserType.launch: Executable doesn't exist` errors across all GitHub Actions workflows (`daily_summary.yml`, `full_day_summary.yml`, `manual_summary.yml`) when `playwright>=1.40.0` updates upstream on PyPI without changing `requirements.txt`.

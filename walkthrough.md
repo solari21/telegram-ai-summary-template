@@ -1,4 +1,19 @@
-# Walkthrough: Versioned Playwright Cache & CI/CD Self-Healing (v0.4.2)
+# Walkthrough: Anti-Duplication Cloud Scheduling Guidance (v0.4.3)
+
+This document certifies the synchronization of `telegram-ai-summary-template` (`v0.4.3`) with the production scheduling fix in `reconectados-summary-bot` (`v1.2.3`).
+
+---
+
+## 1. 🔍 Context & Changes
+
+- **Root Cause in Production**: Running both `cron-job.org` (`repository_dispatch`) and GitHub Actions' native `on: schedule:` simultaneously produced 8 daily digests instead of 4, with the `schedule` runs arriving 3–9+ hours late (e.g., Morning Edition arriving at 16:28 Madrid).
+- **Template Update**:
+  - Added clear warnings in `.github/workflows/daily_summary.yml` and `.github/workflows/full_day_summary.yml` instructing fork users to disable `on: schedule:` when `cron-job.org` is active.
+  - Updated `pyproject.toml` to `0.4.3`, rebuilt `dist/*`, and synchronized `README.md`, `README_EN.md`, `TODO.md`, and `task.md`.
+
+---
+
+# Walkthrough (Historical): Versioned Playwright Cache & CI/CD Self-Healing (v0.4.2)
 
 This document certifies the synchronization of the public template `telegram-ai-summary-template` (`v0.4.2`) with the production fix in `reconectados-summary-bot` (`v1.2.2`), resolving `playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist` across GitHub Actions workflows.
 

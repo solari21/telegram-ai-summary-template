@@ -1,6 +1,8 @@
 name: Telegram AI - Full Day Digest (24 Hours)
 
 on:
+  # NOTE: If you use an external scheduler like cron-job.org (repository_dispatch),
+  # remove or comment out this `schedule` block to avoid duplicate, 5-6h delayed runs.
   schedule:
     # 23:58 Madrid time (CET UTC+1 -> 22:58 UTC)
     - cron: '58 22 * * *'
